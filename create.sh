@@ -1,9 +1,11 @@
 
-if [ $1 ]; then
-    rm -r daily/$1
+if [ $1 ]; 
+then
+    mkdir daily/$1
+else
+    echo "Please provide a name for the directory"
+    exit 1
 fi
-
-mkdir daily/$1
 
 
 cd daily/$1
