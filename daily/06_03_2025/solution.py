@@ -1,12 +1,13 @@
 from typing import List
 
+
 class Solution:
     def findMissingAndRepeatedValues(self, grid: List[List[int]]) -> List[int]:
         n = len(grid)
 
-        up_bound = n ** 2
+        up_bound = n**2
         expected_sum = up_bound * (up_bound + 1) // 2
-        expected_square_sum = up_bound * (up_bound + 1) * (2*up_bound + 1) // 6
+        expected_square_sum = up_bound * (up_bound + 1) * (2 * up_bound + 1) // 6
         actual_sum = 0
         actual_square_sum = 0
 

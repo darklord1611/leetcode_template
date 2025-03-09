@@ -1,5 +1,6 @@
 from typing import List
 
+
 class Solution:
     def applyOperations(self, nums: List[int]) -> List[int]:
         n = len(nums)
@@ -13,8 +14,8 @@ class Solution:
         for i in range(n):
             if nums[i] == 0:
                 zero_count += 1
-        
+
         res = [num for num in nums if num != 0]
         res.extend([0 for _ in range(zero_count)])
-        
+
         return res

@@ -1,5 +1,6 @@
 from typing import List
 
+
 class Solution:
     def pivotArray(self, nums: List[int], pivot: int) -> List[int]:
         # find all smaller numbers and then put them into a list
@@ -18,10 +19,8 @@ class Solution:
                 greater_than_pivot.append(nums[i])
             else:
                 pivot_count += 1
-        
+
         less_than_pivot.extend([pivot for _ in range(pivot_count)])
         less_than_pivot.extend(greater_than_pivot)
 
         return less_than_pivot
-
-        
