@@ -25,7 +25,6 @@ DESCRIPTION=$(echo "$RESPONSE" | jq -r '.data.activeDailyCodingChallengeQuestion
 # Check if API returned valid data
 if [[ -z "$TITLE" || -z "$DESCRIPTION" ]]; then
     echo "❌ Failed to fetch problem data. Check your internet connection or API status."
-    exit 1
 fi
 
 # Remove HTML tags and strip out examples
