@@ -19,11 +19,12 @@ import heapq
 class Solution:
     def countDays(self, days: int, meetings: List[List[int]]) -> int:
         n = len(meetings)
-        heapq.heapify(meetings)
         total_free_days = 0
         cur_max_occupied_day = 0
+        
+        heapq.heapify(meetings)
 
-        cur_starting_day = 1
+
         while len(meetings) != 0:
 
             start_day, end_day = heapq.heappop(meetings)
