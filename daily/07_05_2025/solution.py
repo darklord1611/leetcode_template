@@ -33,7 +33,7 @@ class Solution:
         min_time = 0
 
         while len(queue) != 0:
-            x, y, time = heapq.heappop(queue)
+            time, x, y = heapq.heappop(queue) # pop the cell with the minimum time to reach
             min_time = max(min_time, time) # update the current minimum time to reach the current cell
 
             if x == n - 1 and y == m - 1:
@@ -49,7 +49,7 @@ class Solution:
                     continue
                 
                 max_dist = max(min_time, moveTime[new_x][new_y]) + 1 # calculate the minimum time to reach adjacent cells
-                heapq.heappush(queue, (new_x, new_y, max_dist))
+                heapq.heappush(queue, (max_dist, new_x, new_y))
                 visited.add((new_x, new_y))
             
         return min_time
