@@ -4,16 +4,17 @@
 # URL: https://leetcode.com/problems/count-largest-group/
 #
 # You are given an integer n.
-# 
+#
 # Each number from 1 to n is grouped according to the sum of its digits.
-# 
+#
 # Return the number of groups that have the largest size.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
 from collections import defaultdict
+
 
 class Solution:
     def countLargestGroup(self, n: int) -> int:
@@ -25,9 +26,9 @@ class Solution:
             while temp != 0:
                 cur_sum += temp % 10
                 temp = temp // 10
-            
+
             group_sums[cur_sum] += 1
-        
+
         max_group_size = 0
         max_group_count = 0
 
@@ -37,7 +38,5 @@ class Solution:
                 max_group_count = 1
             elif max_group_size == group_sums[key]:
                 max_group_count += 1
-        
-        return max_group_count
-            
 
+        return max_group_count

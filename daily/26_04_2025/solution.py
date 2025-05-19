@@ -4,19 +4,19 @@
 # URL: https://leetcode.com/problems/count-subarrays-with-fixed-bounds/
 #
 # You are given an integer array nums and two integers minK and maxK.
-# 
+#
 # A fixed-bound subarray of nums is a subarray that satisfies the following conditions:
-# 
-# 
+#
+#
 # 	The minimum value in the subarray is equal to minK.
 # 	The maximum value in the subarray is equal to maxK.
-# 
-# 
+#
+#
 # Return the number of fixed-bound subarrays.
-# 
+#
 # A subarray is a contiguous part of an array.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
@@ -46,12 +46,13 @@ class Solution:
             if nums[i] < minK or nums[i] > maxK:
                 last_invalid_index = i
 
-            if last_invalid_index > min(last_min_index, last_max_index): # why min? because we need both min and max values to be in the array to be valid
+            if (
+                last_invalid_index > min(last_min_index, last_max_index)
+            ):  # why min? because we need both min and max values to be in the array to be valid
                 continue
             res += min(last_min_index, last_max_index) - last_invalid_index
 
         # Time Complexity: O(n)
         # Space Complexity: O(1)
-        
-        return res
 
+        return res

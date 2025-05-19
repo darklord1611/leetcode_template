@@ -1,9 +1,9 @@
 # LeetCode Daily Challenge ()
-# Title: 
-# Difficulty: 
+# Title:
+# Difficulty:
 # URL: https://leetcode.com/problems//
 #
-# 
+#
 
 
 # Your solution starts here
@@ -11,6 +11,7 @@
 from typing import List
 from collections import defaultdict
 import math
+
 
 class Solution:
     def repairCars(self, ranks: List[int], cars: int) -> int:
@@ -31,14 +32,16 @@ class Solution:
 
         while low < high:
             mid = (low + high) // 2
-            total_cars_fixed = 0    
+            total_cars_fixed = 0
             for rank in freq:
                 cars_count = math.floor(math.sqrt(mid / rank)) * freq[rank]
                 total_cars_fixed += cars_count
-            
-            if total_cars_fixed >= cars: # we already fixed the required number of cars, can we do faster?
+
+            if (
+                total_cars_fixed >= cars
+            ):  # we already fixed the required number of cars, can we do faster?
                 high = mid
-            else: # we are not fixing enough cars in this amount of time -> increase time limit
+            else:  # we are not fixing enough cars in this amount of time -> increase time limit
                 low = mid + 1
-        
+
         return low

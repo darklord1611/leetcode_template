@@ -4,12 +4,13 @@
 # URL: https://leetcode.com/problems/find-numbers-with-even-number-of-digits/
 #
 # Given an array nums of integers, return how many of them contain an even number of digits.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
 from typing import List
+
 
 class Solution:
     def findNumbers(self, nums: List[int]) -> int:
@@ -20,8 +21,8 @@ class Solution:
             while temp != 0:
                 temp = temp // 10
                 cur_count += 1
-            
+
             if cur_count % 2 == 0:
                 count += 1
-        
+
         return count

@@ -4,14 +4,14 @@
 # URL: https://leetcode.com/problems/minimum-domino-rotations-for-equal-row/
 #
 # In a row of dominoes, tops[i] and bottoms[i] represent the top and bottom halves of the ith domino. (A domino is a tile with two numbers from 1 to 6 - one on each half of the tile.)
-# 
+#
 # We may rotate the ith domino, so that tops[i] and bottoms[i] swap values.
-# 
+#
 # Return the minimum number of rotations so that all the values in tops are the same, or all the values in bottoms are the same.
-# 
+#
 # If it cannot be done, return -1.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
@@ -37,17 +37,16 @@ class Solution:
         for i in range(n):
             counts[tops[i]][0] += 1
             counts[bottoms[i]][1] += 1
-            if tops[i] == bottoms[i]: # record the duplicate count
+            if tops[i] == bottoms[i]:  # record the duplicate count
                 counts[tops[i]][2] += 1
-        
+
         for i in range(1, 7):
             freq = counts[i][0] + counts[i][1] - counts[i][2]
             if freq >= n and freq > max_count:
                 max_count = counts[i][0] + counts[i][1]
                 max_num = i
-        
+
         if max_count == 0:
             return -1
 
         return min(n - counts[max_num][0], n - counts[max_num][1])
-        

@@ -4,14 +4,15 @@
 # URL: https://leetcode.com/problems/number-of-equivalent-domino-pairs/
 #
 # Given a list of dominoes, dominoes[i] = [a, b] is equivalent to dominoes[j] = [c, d] if and only if either (a == c and b == d), or (a == d and b == c) - that is, one domino can be rotated to be equal to another domino.
-# 
+#
 # Return the number of pairs (i, j) for which 0 &lt;= i &lt; j &lt; dominoes.length, and dominoes[i] is equivalent to dominoes[j].
-# 
-#  
+#
+#
 
 
 # Your solution starts here
 from typing import List
+
 
 class Solution:
     def numEquivDominoPairs(self, dominoes: List[List[int]]) -> int:
@@ -29,7 +30,7 @@ class Solution:
                 freq[(min_side, max_side)] = 1
             else:
                 freq[(min_side, max_side)] += 1
-        
+
         for key in freq:
             if freq[key] >= 2:
                 total_pairs += freq[key] * (freq[key] - 1) // 2

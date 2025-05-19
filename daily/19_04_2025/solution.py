@@ -4,19 +4,20 @@
 # URL: https://leetcode.com/problems/count-the-number-of-fair-pairs/
 #
 # Given a 0-indexed integer array nums of size n and two integers lower and upper, return the number of fair pairs.
-# 
+#
 # A pair (i, j) is fair if:
-# 
-# 
+#
+#
 # 	0 &lt;= i &lt; j &lt; n, and
 # 	lower &lt;= nums[i] + nums[j] &lt;= upper
-# 
-# 
-#  
+#
+#
+#
 
 
 # Your solution starts here
 from typing import List
+
 
 class Solution:
     def countFairPairs(self, nums: List[int], lower: int, upper: int) -> int:
@@ -38,7 +39,7 @@ class Solution:
                     left += 1
                 else:
                     right -= 1
-            
+
             return res
-        
+
         return lower_bound(upper + 1) - lower_bound(lower)

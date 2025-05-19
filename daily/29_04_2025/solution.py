@@ -4,15 +4,16 @@
 # URL: https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times/
 #
 # You are given an integer array nums and a positive integer k.
-# 
+#
 # Return the number of subarrays where the maximum element of nums appears at least k times in that subarray.
-# 
+#
 # A subarray is a contiguous sequence of elements within an array.
-# 
-#  
+#
+#
 
 # Your solution starts here
 from typing import List
+
 
 class Solution:
     def countSubarrays(self, nums: List[int], k: int) -> int:
@@ -37,14 +38,12 @@ class Solution:
         for right in range(n):
             if nums[right] == max_num:
                 cur_max_freq += 1
-            
+
             while cur_max_freq >= k:
                 if nums[left] == max_num:
                     cur_max_freq -= 1
                 left += 1
-            
+
             count += right - left + 1
-        
+
         return n * (n + 1) // 2 - count
-
-

@@ -4,15 +4,15 @@
 # URL: https://leetcode.com/problems/largest-divisible-subset/
 #
 # Given a set of distinct positive integers nums, return the largest subset answer such that every pair (answer[i], answer[j]) of elements in this subset satisfies:
-# 
-# 
+#
+#
 # 	answer[i] % answer[j] == 0, or
 # 	answer[j] % answer[i] == 0
-# 
-# 
+#
+#
 # If there are multiple solutions, return any of them.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
@@ -20,6 +20,7 @@ from typing import List
 
 
 # TOP DOWN DP
+
 
 class Solution:
     def largestDivisibleSubset(self, nums: List[int]) -> List[int]:
@@ -34,7 +35,7 @@ class Solution:
         def dfs(index) -> List[int]:
             if index >= n:
                 return []
-            
+
             if index in cache:
                 return cache[index]
 
@@ -44,22 +45,24 @@ class Solution:
 
             for i in range(index + 1, n):
                 if nums[i] % nums[index] == 0:
-                    tmp_subset = [nums[index]] + dfs(i) # continue exploring the ith index
+                    tmp_subset = [nums[index]] + dfs(
+                        i
+                    )  # continue exploring the ith index
                     if len(tmp_subset) > len(cur_subset):
                         cur_subset = tmp_subset
-            
+
             cache[index] = cur_subset
             return cur_subset
-        
+
         res = []
-        for i in range(n): # check all subsets starting at any possible indexes
+        for i in range(n):  # check all subsets starting at any possible indexes
             tmp_subset = dfs(i)
             if len(tmp_subset) > len(res):
                 res = tmp_subset
 
         # Time Complexity: O(n^2)
         # Space Complexity: O(n)
-        
+
         return res
 
 

@@ -1,13 +1,14 @@
 # LeetCode Daily Challenge ()
-# Title: 
-# Difficulty: 
+# Title:
+# Difficulty:
 # URL: https://leetcode.com/problems//
 #
-# 
+#
 
 
 # Your solution starts here
 from typing import List
+
 
 class Solution:
     def partitionLabels(self, temp: str) -> List[int]:
@@ -28,7 +29,6 @@ class Solution:
         for key in first_and_last_indexes:
             intervals.append(first_and_last_indexes[key])
 
-
         ans = self.check_interval(intervals)
 
         # Time complexity: O(n)
@@ -36,9 +36,7 @@ class Solution:
 
         return ans
 
-
     def check_interval(self, intervals: List[List[int]]) -> List[int]:
-
         n = len(intervals)
         res = []
         intervals.sort()
@@ -48,7 +46,7 @@ class Solution:
 
         for i in range(1, n):
             if intervals[i][0] <= max_overlap_num:
-                max_overlap_num = max(max_overlap_num, intervals[i][1]) 
+                max_overlap_num = max(max_overlap_num, intervals[i][1])
             else:
                 res.append([min_overlap_num, max_overlap_num])
                 min_overlap_num = intervals[i][0]
@@ -56,6 +54,4 @@ class Solution:
 
         res.append([min_overlap_num, max_overlap_num])
 
-
         return [part[1] - part[0] + 1 for part in res]
-
