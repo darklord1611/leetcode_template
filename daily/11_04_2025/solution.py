@@ -19,7 +19,6 @@ class Solution:
 
         def count(num: int):
             res = 0
-            halfway_sum = 0
             for i in range(1, num + 1):
                 num_digits = 0
                 temp = i

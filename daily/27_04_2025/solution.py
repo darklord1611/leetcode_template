@@ -16,7 +16,6 @@ class Solution:
         # sliding window
 
         n = len(nums)
-        k = 3
         left = 0
         count = 0
         for right in range(n):

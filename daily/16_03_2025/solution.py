@@ -20,7 +20,7 @@ class Solution:
         # for a fixed amount of time, can we figure out how many cars can be repaired?
         # we want to find minimum amount of time, we have a predefined time range, we can calculate the number of fixed cars for a certain amount of time? -> what algorithm can make use of all these new constraints?
 
-        n = len(ranks)
+        len(ranks)
 
         high = max(ranks) * cars * cars
         low = 1

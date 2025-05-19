@@ -31,7 +31,7 @@ class Solution:
         # problem can also be interpreted as returning number of DISTINCT integers GREATER than k 
 
         unique_nums = set(nums)
-        n = len(unique_nums)
+        len(unique_nums)
         max_ops = 0
         for num in unique_nums:
             if num < k:

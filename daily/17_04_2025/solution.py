@@ -8,7 +8,6 @@
 
 
 # Your solution starts here
-from collections import defaultdict
 from typing import List
 
 class Solution:

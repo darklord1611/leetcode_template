@@ -22,7 +22,7 @@
 
 
 # Your solution starts here
-from collections import Counter, defaultdict
+from collections import Counter
 import math
 
 class Solution:

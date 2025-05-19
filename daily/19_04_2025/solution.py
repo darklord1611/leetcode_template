@@ -24,7 +24,6 @@ class Solution:
         # we want the count and not the exact indexes
         # suppose the number is sorted, what happen if a pair (i, j) is valid with i << j? Think about the pairs in-between
         # lower <= ... <= high -> can we simplify this condition? -> 0 <= ... <= high + 1 would contains everything we need + some extras -> extras? just substract counts from 0 <= ... <= lower -> done
-        pair_count = 0
         n = len(nums)
         nums.sort()
 

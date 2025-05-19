@@ -18,7 +18,7 @@ import heapq
 
 class Solution:
     def countDays(self, days: int, meetings: List[List[int]]) -> int:
-        n = len(meetings)
+        len(meetings)
         total_free_days = 0
         cur_max_occupied_day = 0
         

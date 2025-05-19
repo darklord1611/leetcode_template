@@ -42,7 +42,7 @@ class Solution:
         x_intervals = []
         y_intervals = []
 
-        m = len(rectangles)
+        len(rectangles)
 
         for rec in rectangles:
             x_intervals.append([rec[0], rec[2]])
