@@ -1,2 +1,2 @@
-ruff check --fixes
+ruff check --fix
 ruff format
