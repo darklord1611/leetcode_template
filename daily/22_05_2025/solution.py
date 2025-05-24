@@ -29,8 +29,8 @@ class Solution:
         # how many queries needed to make the first element satisfied? nums[0] queries with left endpoints be nums[0]
         # notice that we want to process queries to make the first element valid before moving onto to the second element -> sort the queries according to the start index
         # suppose we already have k queries that include current number, which one should we prioritize? the ones with larger ending indices -> cover more numbers -> use max heap to store valid queries for an index
-        
-        # how to keep track of the number of operations needed to make the current number and potential future numbers valid? -> difference array  
+
+        # how to keep track of the number of operations needed to make the current number and potential future numbers valid? -> difference array
 
         queries.sort(key=lambda x: x[0])
         heap = []
