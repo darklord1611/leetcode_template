@@ -28,7 +28,7 @@ class Solution:
         # then we check for each satisfied node and find the min dist
 
         n = len(edges)
-        adj_list = [[] for _ in range(n)]s
+        adj_list = [[] for _ in range(n)]
         min_dist = float("inf")
         min_idx = -1
         for i in range(n):
