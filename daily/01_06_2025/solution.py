@@ -4,13 +4,14 @@
 # URL: https://leetcode.com/problems/distribute-candies-among-children-ii/
 #
 # You are given two positive integers n and limit.
-# 
+#
 # Return the total number of ways to distribute n candies among 3 children such that no child gets more than limit candies.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
+
 
 class Solution:
     def distributeCandies(self, n: int, limit: int) -> int:
@@ -33,12 +34,9 @@ class Solution:
             right_bound = min(n - k1, limit)
 
             valid_choices = right_bound - left_bound + 1
-            if valid_choices > 0: # exist valid pairs
+            if valid_choices > 0:  # exist valid pairs
                 total_ways += valid_choices
-            
+
         # Time Complexity: O(n)
         # Space Complexity: O(1)
         return total_ways
-
-        
-        

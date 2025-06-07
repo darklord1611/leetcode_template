@@ -1,12 +1,13 @@
 # LeetCode Daily Challenge ()
-# Title: 
-# Difficulty: 
+# Title:
+# Difficulty:
 # URL: https://leetcode.com/problems//
 #
-# 
+#
 
 
 # Your solution starts here
+
 
 def solution():
     pass

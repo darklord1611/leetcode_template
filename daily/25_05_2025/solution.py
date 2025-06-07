@@ -37,7 +37,9 @@ class Solution:
         for i in range(n):
             freq[words[i]] += 1
 
-        for key in list(freq.keys()):  # convert keys to a new list to avoid runtime error when add key to used_words
+        for key in list(
+            freq.keys()
+        ):  # convert keys to a new list to avoid runtime error when add key to used_words
             if freq[key] == 0 or freq[key[::-1]] == 0:
                 continue
 
@@ -53,7 +55,7 @@ class Solution:
                     min(freq[key], freq[key[::-1]]) * 4
                 )  # take the min of x and x.reverse()
 
-            freq[key] = 0 # mark as used
+            freq[key] = 0  # mark as used
 
         # Time Complexity: O(n)
         # Space Complexity: O(n)
