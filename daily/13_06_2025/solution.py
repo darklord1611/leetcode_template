@@ -4,17 +4,18 @@
 # URL: https://leetcode.com/problems/minimize-the-maximum-difference-of-pairs/
 #
 # You are given a 0-indexed integer array nums and an integer p. Find p pairs of indices of nums such that the maximum difference amongst all the pairs is minimized. Also, ensure no index appears more than once amongst the p pairs.
-# 
+#
 # Note that for a pair of elements at the index i and j, the difference of this pair is |nums[i] - nums[j]|, where |x| represents the absolute value of x.
-# 
+#
 # Return the minimum maximum difference among all p pairs. We define the maximum of an empty set to be zero.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
 
 from typing import List
+
 
 class Solution:
     def minimizeMax(self, nums: List[int], p: int) -> int:
@@ -37,7 +38,6 @@ class Solution:
         n = len(nums)
         nums.sort()
 
-
         def countValidPairs(k):
             idx = 0
             cnt = 0
@@ -48,7 +48,7 @@ class Solution:
                 else:
                     idx += 1
             return cnt
-        
+
         left = 0
         right = nums[n - 1] - nums[0]
 
@@ -62,13 +62,5 @@ class Solution:
                 right = mid
             else:
                 left = mid + 1
-        
+
         return left
-            
-
-
-        
-
-
-
-        

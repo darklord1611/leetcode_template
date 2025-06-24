@@ -4,23 +4,24 @@
 # URL: https://leetcode.com/problems/max-difference-you-can-get-from-changing-an-integer/
 #
 # You are given an integer num. You will apply the following steps to num two separate times:
-# 
-# 
+#
+#
 # 	Pick a digit x (0 &lt;= x &lt;= 9).
 # 	Pick another digit y (0 &lt;= y &lt;= 9). Note y can be equal to x.
 # 	Replace all the occurrences of x in the decimal representation of num by y.
-# 
-# 
+#
+#
 # Let a and b be the two results from applying the operation to num independently.
-# 
+#
 # Return the max difference between a and b.
-# 
+#
 # Note that neither a nor b may have any leading zeros, and must not be 0.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
+
 
 class Solution:
     def maxDiff(self, num: int) -> int:
@@ -44,18 +45,17 @@ class Solution:
             # find the rightmost digit that not equal to 9 for max transform
             if digit_str[i] != "9" and max_digit_char_to_trans == "":
                 max_digit_char_to_trans = digit_str[i]
-            
+
             # find the rightmost digit that not equal to 1 for min transform
             if digit_str[i] not in nums_to_exclude and min_digit_char_to_trans == "":
                 min_digit_char_to_trans = digit_str[i]
-        
-        min_digit = "1" if (min_digit_char_to_trans == digit_str[0]) else "0"
 
+        min_digit = "1" if (min_digit_char_to_trans == digit_str[0]) else "0"
 
         for i in range(n):
             temp = digit_str[i]
             if digit_str[i] == max_digit_char_to_trans:
-                temp = "9"   
+                temp = "9"
             max_num.append(temp)
 
             temp = digit_str[i]
