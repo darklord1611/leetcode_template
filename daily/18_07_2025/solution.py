@@ -4,29 +4,30 @@
 # URL: https://leetcode.com/problems/minimum-difference-in-sums-after-removal-of-elements/
 #
 # You are given a 0-indexed integer array nums consisting of 3 * n elements.
-# 
+#
 # You are allowed to remove any subsequence of elements of size exactly n from nums. The remaining 2 * n elements will be divided into two equal parts:
-# 
-# 
+#
+#
 # 	The first n elements belonging to the first part and their sum is sumfirst.
 # 	The next n elements belonging to the second part and their sum is sumsecond.
-# 
-# 
+#
+#
 # The difference in sums of the two parts is denoted as sumfirst - sumsecond.
-# 
-# 
+#
+#
 # 	For example, if sumfirst = 3 and sumsecond = 2, their difference is 1.
 # 	Similarly, if sumfirst = 2 and sumsecond = 3, their difference is -1.
-# 
-# 
+#
+#
 # Return the minimum difference possible between the sums of the two parts after the removal of n elements.
-# 
-#  
+#
+#
 
 
 # Your solution starts here
 from typing import List
 import heapq
+
 
 class Solution:
     def minimumDifference(self, nums: List[int]) -> int:
@@ -41,7 +42,7 @@ class Solution:
         # so the problem boils down to which elements of the subarray should we keep?
         # we need to minimize first subarray -> choose n smallest elements
         # we need to maximize second subarray -> choose n largest elements
-        
+
         # how to keep track of n min/max elements out of k -> heap
 
         # for each choice of partition index k, we need to calculate first sum - second sum -> prefix + suffix sums
@@ -63,10 +64,10 @@ class Solution:
             if len(min_left_heap) > n:
                 min_element = -heapq.heappop(min_left_heap)
                 cur_sum -= min_element
-            
+
             if len(min_left_heap) == n:
                 min_sums[i] = cur_sum
-        
+
         max_right_heap = []
         cur_sum = 0
 
@@ -77,15 +78,16 @@ class Solution:
             if len(max_right_heap) > n:
                 max_element = heapq.heappop(max_right_heap)
                 cur_sum -= max_element
-            
+
             if len(max_right_heap) == n:
                 max_sums[i] = cur_sum
-        
+
         # now consider all possible choices for k
         res = float("inf")
-        for k in range(n - 1, 2*n):
-            res = min(res, min_sums[k] - max_sums[k + 1]) # min_sums[k] is the sum of n smallest elements, max_sums[k] is the sum of n largest elements
-        
+        for k in range(n - 1, 2 * n):
+            res = min(
+                res, min_sums[k] - max_sums[k + 1]
+            )  # min_sums[k] is the sum of n smallest elements, max_sums[k] is the sum of n largest elements
 
         # Time Complexity: O(n log n) due to heap operations
         # Space Complexity: O(n) for storing the prefix and suffix sums
