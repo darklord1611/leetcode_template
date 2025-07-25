@@ -1,6 +1,7 @@
 import torch
 
 
-# A, B, C are tensors on the GPU
-def solve(A: torch.Tensor, B: torch.Tensor, C: torch.Tensor, M: int, N: int, K: int):
-    pass
+# input is a tensor on the GPU
+def solve(input: torch.Tensor, N: int):
+    input_rev = torch.flip(input, dims=[0])
+    input.copy_(input_rev)
