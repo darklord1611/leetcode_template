@@ -43,4 +43,5 @@ class Solution:
 
         # Time Complexity: O(n) -> single pass through the array
         # Space Complexity: O(1) -> no extra space used
+
         return max_count
