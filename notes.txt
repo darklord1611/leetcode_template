@@ -1,0 +1,7 @@
+# List of few interesting concepts
+
+### Rainbow Table
+- Imagine you have a leaked hash of some passwords -> how to reverse the hash and find the real password in text?
+    - Naive brute force -> try the hash function on every single possible text passwords until we get a match -> inefficient in computation but minimal storage
+    - Lookup Table -> precompute the hashes and store in a big table -> less storage efficient but more compute-friendly
+    - Rainbow Table? -> "the best of both world" kind of thing, 
