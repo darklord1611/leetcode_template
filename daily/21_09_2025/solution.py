@@ -33,6 +33,7 @@
 
 # Your solution starts here
 from typing import List
+from collections import defaultdict
 
 from sortedcontainers import SortedSet
 
