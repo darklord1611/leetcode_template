@@ -4,10 +4,10 @@
 FOLDER_NAME=${1:-$(date +"%d_%m_%Y")}
 
 # Create the daily folder
-mkdir -p "daily/$FOLDER_NAME"
+mkdir -p "leetcode_daily/$FOLDER_NAME"
 
 # Move into the folder
-cd "daily/$FOLDER_NAME" || exit 1
+cd "leetcode_daily/$FOLDER_NAME" || exit 1
 
 # API Endpoint
 API_URL="https://alfa-leetcode-api.onrender.com/dailyQuestion"
