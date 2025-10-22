@@ -1,13 +1,14 @@
 # LeetCode Daily Challenge ()
-# Title: 
-# Difficulty: 
+# Title:
+# Difficulty:
 # URL: https://leetcode.com/problems//
 #
-# 
+#
 
 
 # Your solution starts here
 from typing import List
+
 
 class Solution:
     def finalValueAfterOperations(self, operations: List[str]) -> int:
@@ -18,6 +19,5 @@ class Solution:
                 final_val += 1
             else:
                 final_val -= 1
-            
-        
+
         return final_val

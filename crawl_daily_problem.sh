@@ -1,49 +1,85 @@
 #!/bin/bash
+# Usage: ./fetch_leetcode_daily.sh [folder_name]
+# If no folder_name is provided, a date-based folder will be created.
 
-# Get current date in DD_MM_YYYY format if no argument is provided
+# -------------------------------
+# 1. Setup
+# -------------------------------
+
 FOLDER_NAME=${1:-$(date +"%d_%m_%Y")}
+BASE_DIR="leetcode_daily/$FOLDER_NAME"
+API_URL="https://leetcode-api-pied.vercel.app/daily"
 
-# Create the daily folder
-mkdir -p "leetcode_daily/$FOLDER_NAME"
+mkdir -p "$BASE_DIR"
+cd "$BASE_DIR" || exit 1
 
-# Move into the folder
-cd "leetcode_daily/$FOLDER_NAME" || exit 1
+# -------------------------------
+# 2. Fetch from API
+# -------------------------------
 
-# API Endpoint
-API_URL="https://alfa-leetcode-api.onrender.com/dailyQuestion"
-
-# Fetch data from API
+echo "📡 Fetching LeetCode daily challenge..."
 RESPONSE=$(curl -s "$API_URL")
 
-# Extract values using jq (handles Unicode properly)
-TITLE=$(echo "$RESPONSE" | jq -r '.data.activeDailyCodingChallengeQuestion.question.title' 2>/dev/null)
-SLUG=$(echo "$RESPONSE" | jq -r '.data.activeDailyCodingChallengeQuestion.question.titleSlug' 2>/dev/null)
-DATE=$(echo "$RESPONSE" | jq -r '.data.activeDailyCodingChallengeQuestion.date' 2>/dev/null)
-DIFFICULTY=$(echo "$RESPONSE" | jq -r '.data.activeDailyCodingChallengeQuestion.question.difficulty' 2>/dev/null)
-DESCRIPTION=$(echo "$RESPONSE" | jq -r '.data.activeDailyCodingChallengeQuestion.question.content' 2>/dev/null)
-
-# Check if API returned valid data
-if [[ -z "$TITLE" || -z "$DESCRIPTION" ]]; then
-    echo "❌ Failed to fetch problem data. Check your internet connection or API status."
+if [[ -z "$RESPONSE" ]]; then
+    echo "❌ No response from API. Check your connection."
+    exit 1
 fi
 
-# Remove HTML tags and strip out examples
+# -------------------------------
+# 3. Extract fields with jq
+# -------------------------------
+
+DATE=$(echo "$RESPONSE" | jq -r '.date')
+TITLE=$(echo "$RESPONSE" | jq -r '.question.title')
+SLUG=$(echo "$RESPONSE" | jq -r '.question.titleSlug')
+DIFFICULTY=$(echo "$RESPONSE" | jq -r '.question.difficulty')
+DESCRIPTION=$(echo "$RESPONSE" | jq -r '.question.content')
+AC_RATE=$(echo "$RESPONSE" | jq -r '.question.acRate')
+TAGS=$(echo "$RESPONSE" | jq -r '[.question.topicTags[].name] | join(", ")')
+
+# Validate data
+if [[ -z "$TITLE" || "$TITLE" == "null" ]]; then
+    echo "❌ Failed to parse API response. The structure might have changed."
+    exit 1
+fi
+
+# -------------------------------
+# 4. Clean HTML from description
+# -------------------------------
+
 DESCRIPTION_CLEAN=$(echo "$DESCRIPTION" | sed -E 's/<[^>]+>//g' | sed 's/&nbsp;/ /g' | awk '
-    /Example [0-9]+:/ {exit} 
+    /Example [0-9]+:/ {exit}
     {print}
 ')
 
-# Format the output as a Python comment block
+# -------------------------------
+# 5. Format as Python comment
+# -------------------------------
+
 COMMENT="# LeetCode Daily Challenge ($DATE)\n"
 COMMENT+="# Title: $TITLE\n"
 COMMENT+="# Difficulty: $DIFFICULTY\n"
+COMMENT+="# Acceptance Rate: $AC_RATE\n"
+COMMENT+="# Tags: $TAGS\n"
 COMMENT+="# URL: https://leetcode.com/problems/$SLUG/\n#\n"
 COMMENT+=$(echo "$DESCRIPTION_CLEAN" | sed 's/^/# /')
 
-# Write the comment block to solution.py
-echo -e "$COMMENT\n\n\n# Your solution starts here\n\ndef solution():\n    pass" > solution.py
+# -------------------------------
+# 6. Save solution template
+# -------------------------------
 
-# Move back to the original directory
+cat <<EOF > solution.py
+$COMMENT
+
+
+# Your solution starts here
+def solution():
+    pass
+EOF
+
+# -------------------------------
+# 7. Done
+# -------------------------------
+
 cd - > /dev/null
-
-echo "✅ Problem saved in daily/$FOLDER_NAME/solution.py"
+echo "✅ Problem saved in leetcode_daily/$FOLDER_NAME/solution.py"
