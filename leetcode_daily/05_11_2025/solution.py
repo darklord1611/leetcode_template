@@ -18,6 +18,7 @@
 # Your solution starts here
 from sortedcontainers import SortedList
 
+
 class Helper:
     def __init__(self, x):
         self.x = x
