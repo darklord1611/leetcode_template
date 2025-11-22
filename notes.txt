@@ -5,3 +5,29 @@
     - Naive brute force -> try the hash function on every single possible text passwords until we get a match -> inefficient in computation but minimal storage
     - Lookup Table -> precompute the hashes and store in a big table -> less storage efficient but more compute-friendly
     - Rainbow Table? -> "the best of both world" kind of thing, 
+
+
+
+
+### GPUs
+- Threads -> Blocks -> Grid (Grid consists of blocks consists of threads)
+
+Example:
+extern "C" void solve(const float* A, const float* B, float* C, int N) {
+    
+    // Step 1: Define the "Team" Size (Block)
+    dim3 threadsPerBlock(16, 16); 
+
+    // Step 2: Calculate how many "Teams" we need (Grid)
+    int blocksX = (N + threadsPerBlock.x - 1) / threadsPerBlock.x;
+    int blocksY = (N + threadsPerBlock.y - 1) / threadsPerBlock.y;
+    
+    // Step 3: Define the Grid dimensions
+    dim3 blocksPerGrid(blocksX, blocksY);
+
+    // Step 4: Launch the job
+    matrix_add_2D<<<blocksPerGrid, threadsPerBlock>>>(A, B, C, N);
+    
+    // Step 5: Wait for completion
+    cudaDeviceSynchronize();
+}
