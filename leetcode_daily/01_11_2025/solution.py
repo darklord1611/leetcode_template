@@ -4,51 +4,46 @@
 
 
 # Your solution starts here
-from typing import List, Optional
-
 from collections import defaultdict
+from typing import List, Optional
 
 
 # Definition for singly-linked list.
 class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+	def __init__(self, val=0, next=None):
+		self.val = val
+		self.next = next
 
 
 class Solution:
-    def modifiedList(
-        self, nums: List[int], head: Optional[ListNode]
-    ) -> Optional[ListNode]:
-        # get the first node which values are not in nums -> gonna be our new head
-        # store nums as dict for faster lookup
+	def modifiedList(self, nums: List[int], head: Optional[ListNode]) -> Optional[ListNode]:
+		# get the first node which values are not in nums -> gonna be our new head
+		# store nums as dict for faster lookup
 
-        lookup = defaultdict(int)
-        for num in nums:
-            lookup[num] = 1
+		lookup = defaultdict(int)
+		for num in nums:
+			lookup[num] = 1
 
-        # find our new head
-        cur = head
-        new_head = None
+		# find our new head
+		cur = head
+		new_head = None
 
-        while (
-            lookup[cur.val] != 0
-        ):  # meaning we still have to delete the current number
-            cur = cur.next
+		while lookup[cur.val] != 0:  # meaning we still have to delete the current number
+			cur = cur.next
 
-        new_head = cur
+		new_head = cur
 
-        # advance prev and cur ptrs
-        prev = cur
-        cur = cur.next
+		# advance prev and cur ptrs
+		prev = cur
+		cur = cur.next
 
-        while cur != None:
-            if lookup[cur.val] == 1:
-                prev.next = cur.next
-                cur.next = None
-                cur = prev.next
-            else:
-                prev = cur
-                cur = cur.next
+		while cur != None:
+			if lookup[cur.val] == 1:
+				prev.next = cur.next
+				cur.next = None
+				cur = prev.next
+			else:
+				prev = cur
+				cur = cur.next
 
-        return new_head
+		return new_head

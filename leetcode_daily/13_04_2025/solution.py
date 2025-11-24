@@ -18,24 +18,24 @@
 
 # Your solution starts here
 class Solution:
-    def countGoodNumbers(self, n: int) -> int:
-        mod = 10**9 + 7
+	def countGoodNumbers(self, n: int) -> int:
+		mod = 10**9 + 7
 
-        if n % 2 == 0:
-            even_count = n // 2
-            odd_count = n // 2
-        else:
-            even_count = n // 2 + 1
-            odd_count = n // 2
+		if n % 2 == 0:
+			even_count = n // 2
+			odd_count = n // 2
+		else:
+			even_count = n // 2 + 1
+			odd_count = n // 2
 
-        def fast_expo(base: int, exp: int, mod: int) -> int:
-            res = 1
-            while exp > 0:
-                if exp % 2 == 1:
-                    res = res * base % mod
-                base = base * base % mod
-                exp = exp // 2
+		def fast_expo(base: int, exp: int, mod: int) -> int:
+			res = 1
+			while exp > 0:
+				if exp % 2 == 1:
+					res = res * base % mod
+				base = base * base % mod
+				exp = exp // 2
 
-            return res
+			return res
 
-        return fast_expo(5, even_count, mod) * fast_expo(4, odd_count, mod) % mod
+		return fast_expo(5, even_count, mod) * fast_expo(4, odd_count, mod) % mod

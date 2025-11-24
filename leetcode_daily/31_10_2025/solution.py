@@ -6,18 +6,17 @@
 
 
 # Your solution starts here
-from typing import List
-
 from collections import defaultdict
+from typing import List
 
 
 class Solution:
-    def getSneakyNumbers(self, nums: List[int]) -> List[int]:
-        freq = defaultdict(int)
-        ans = []
-        for num in nums:
-            freq[num] += 1
-            if freq[num] == 2:
-                ans.append(num)
+	def getSneakyNumbers(self, nums: List[int]) -> List[int]:
+		freq = defaultdict(int)
+		ans = []
+		for num in nums:
+			freq[num] += 1
+			if freq[num] == 2:
+				ans.append(num)
 
-        return ans
+		return ans

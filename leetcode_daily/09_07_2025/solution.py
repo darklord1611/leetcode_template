@@ -23,38 +23,36 @@ from typing import List
 
 
 class Solution:
-    def maxFreeTime(
-        self, eventTime: int, k: int, startTime: List[int], endTime: List[int]
-    ) -> int:
-        # n meetings produce n + 1 breaks, with one meeting, we have the break before and after that meeting
-        # with 2 meetings, we have 3 breaks, and so on -> n meetings have n + 1 breaks
-        # the rescheduling operation is almost like pushing every events to the leftmost and effectively merge the breaks -> k events then we merge k + 1 consecutive(because of the relative order) breaks
-        # problem boils down to find the maximum sum of k + 1 consecutive breaks
+	def maxFreeTime(self, eventTime: int, k: int, startTime: List[int], endTime: List[int]) -> int:
+		# n meetings produce n + 1 breaks, with one meeting, we have the break before and after that meeting
+		# with 2 meetings, we have 3 breaks, and so on -> n meetings have n + 1 breaks
+		# the rescheduling operation is almost like pushing every events to the leftmost and effectively merge the breaks -> k events then we merge k + 1 consecutive(because of the relative order) breaks
+		# problem boils down to find the maximum sum of k + 1 consecutive breaks
 
-        breaks = []
-        last_meeting_end = 0
+		breaks = []
+		last_meeting_end = 0
 
-        for start, end in zip(startTime, endTime):
-            break_time = start - last_meeting_end
+		for start, end in zip(startTime, endTime):
+			break_time = start - last_meeting_end
 
-            breaks.append(break_time)
+			breaks.append(break_time)
 
-            last_meeting_end = end
+			last_meeting_end = end
 
-        last_break_time = eventTime - last_meeting_end
-        breaks.append(last_break_time)
+		last_break_time = eventTime - last_meeting_end
+		breaks.append(last_break_time)
 
-        max_break = 0
-        cur_break = 0
-        left = 0
-        n = len(breaks)
+		max_break = 0
+		cur_break = 0
+		left = 0
+		n = len(breaks)
 
-        for right in range(n):
-            if right - left + 1 > k + 1:  # maintain a window of size k + 1
-                cur_break -= breaks[left]
-                left += 1
+		for right in range(n):
+			if right - left + 1 > k + 1:  # maintain a window of size k + 1
+				cur_break -= breaks[left]
+				left += 1
 
-            cur_break += breaks[right]
-            max_break = max(max_break, cur_break)
+			cur_break += breaks[right]
+			max_break = max(max_break, cur_break)
 
-        return max_break
+		return max_break

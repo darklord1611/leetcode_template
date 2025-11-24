@@ -21,116 +21,110 @@
 
 # Your solution starts here
 
-from typing import List
 from collections import deque
+from typing import List
 
 
 # DFS
 class Solution1:
-    def maxCandies(
-        self,
-        status: List[int],
-        candies: List[int],
-        keys: List[List[int]],
-        containedBoxes: List[List[int]],
-        initialBoxes: List[int],
-    ) -> int:
-        # so we have a bunch of boxes
-        # boxes could be already opened or closed
-        # each box contains some number of candies and potentially contains some number of boxes
-        # we given with some initial number of boxes
+	def maxCandies(
+		self,
+		status: List[int],
+		candies: List[int],
+		keys: List[List[int]],
+		containedBoxes: List[List[int]],
+		initialBoxes: List[int],
+	) -> int:
+		# so we have a bunch of boxes
+		# boxes could be already opened or closed
+		# each box contains some number of candies and potentially contains some number of boxes
+		# we given with some initial number of boxes
 
-        # we recursively open all the boxes we could, then just sum up the candies based on status
+		# we recursively open all the boxes we could, then just sum up the candies based on status
 
-        total_candies = 0
-        n = len(status)
-        has_box = [False] * n
-        used = [False] * n
+		total_candies = 0
+		n = len(status)
+		has_box = [False] * n
+		used = [False] * n
 
-        def dfs(box_idx):
-            if used[box_idx] is True:
-                return 0
+		def dfs(box_idx):
+			if used[box_idx] is True:
+				return 0
 
-            if (
-                status[box_idx] == 0
-            ):  # if the current box is closed -> then we add to the list of acquired & unused boxes
-                has_box[box_idx] = True
-                return 0
+			if status[box_idx] == 0:  # if the current box is closed -> then we add to the list of acquired & unused boxes
+				has_box[box_idx] = True
+				return 0
 
-            used[box_idx] = True
-            total = candies[box_idx]
+			used[box_idx] = True
+			total = candies[box_idx]
 
-            for next_box_idx in containedBoxes[box_idx]:
-                total += dfs(next_box_idx)
+			for next_box_idx in containedBoxes[box_idx]:
+				total += dfs(next_box_idx)
 
-            for box_key in keys[box_idx]:
-                status[box_key] = 1  # "open" the box
-                if (
-                    has_box[box_key] is True
-                ):  # if we have the box of current key then just collect things within that box
-                    total += dfs(box_key)
+			for box_key in keys[box_idx]:
+				status[box_key] = 1  # "open" the box
+				if has_box[box_key] is True:  # if we have the box of current key then just collect things within that box
+					total += dfs(box_key)
 
-            return total
+			return total
 
-        for box in initialBoxes:
-            total_candies += dfs(box)
+		for box in initialBoxes:
+			total_candies += dfs(box)
 
-        return total_candies
+		return total_candies
 
 
 # BFS
 class Solution2:
-    def maxCandies(
-        self,
-        status: List[int],
-        candies: List[int],
-        keys: List[List[int]],
-        containedBoxes: List[List[int]],
-        initialBoxes: List[int],
-    ) -> int:
-        # so we have a bunch of boxes
-        # boxes could be already opened or closed
-        # each box contains some number of candies and potentially contains some number of boxes
-        # we given with some initial number of boxes
+	def maxCandies(
+		self,
+		status: List[int],
+		candies: List[int],
+		keys: List[List[int]],
+		containedBoxes: List[List[int]],
+		initialBoxes: List[int],
+	) -> int:
+		# so we have a bunch of boxes
+		# boxes could be already opened or closed
+		# each box contains some number of candies and potentially contains some number of boxes
+		# we given with some initial number of boxes
 
-        # we recursively open all the boxes we could, then just sum up the candies based on status
+		# we recursively open all the boxes we could, then just sum up the candies based on status
 
-        # there are two ways we can collect the items inside a box, either by collect an opened box or collect the unopened box and the corresponding key
+		# there are two ways we can collect the items inside a box, either by collect an opened box or collect the unopened box and the corresponding key
 
-        total_candies = 0
-        n = len(status)
-        has_box = [False] * n
-        used = [False] * n
-        queue = deque()
+		total_candies = 0
+		n = len(status)
+		has_box = [False] * n
+		used = [False] * n
+		queue = deque()
 
-        # first we add to the queue the initial boxes that we can collect
+		# first we add to the queue the initial boxes that we can collect
 
-        for box in initialBoxes:
-            has_box[box] = (
-                True  # we obtain the box itself, not necessarily the items inside the box, just the box
-            )
-            if status[box] == 1:  # box is already opened
-                queue.append(box)
-                used[box] = True
-                total_candies += candies[box]
+		for box in initialBoxes:
+			has_box[box] = True  # we obtain the box itself, not necessarily the items inside the box, just the box
+			if status[box] == 1:  # box is already opened
+				queue.append(box)
+				used[box] = True
+				total_candies += candies[box]
 
-        while len(queue) != 0:
-            cur_box = queue.popleft()
+		while len(queue) != 0:
+			cur_box = queue.popleft()
 
-            # traverse through the keys, append the box if we have the corresponding key
-            for key in keys[cur_box]:
-                status[key] = 1
-                if not used[key] and has_box[key]:
-                    queue.append(key)
-                    used[key] = True
-                    total_candies += candies[key]
+			# traverse through the keys, append the box if we have the corresponding key
+			for key in keys[cur_box]:
+				status[key] = 1
+				if not used[key] and has_box[key]:
+					queue.append(key)
+					used[key] = True
+					total_candies += candies[key]
 
-            # traverse through the box, only append the box we could open
-            for box in containedBoxes[cur_box]:
-                has_box[box] = True
-                if not used[box] and status[box] == 1:
-                    queue.append(box)
-                    used[box] = True
-                    total_candies += candies[box]
+			# traverse through the box, only append the box we could open
+			for box in containedBoxes[cur_box]:
+				has_box[box] = True
+				if not used[box] and status[box] == 1:
+					queue.append(box)
+					used[box] = True
+					total_candies += candies[box]
 
-        return total_candies
+		return total_candies

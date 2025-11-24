@@ -16,25 +16,21 @@ from typing import List
 
 
 class Solution:
-    def numRabbits(self, answers: List[int]) -> int:
-        # rabbits that answer the same number ->potentially the same color as well
+	def numRabbits(self, answers: List[int]) -> int:
+		# rabbits that answer the same number ->potentially the same color as well
 
-        n = len(answers)
-        freq = defaultdict(int)
-        total_rabbits = 0
+		n = len(answers)
+		freq = defaultdict(int)
+		total_rabbits = 0
 
-        for i in range(n):
-            if answers[i] == 0:
-                total_rabbits += 1
-                continue
-            if (
-                freq[answers[i]] % (answers[i] + 1) == 0
-            ):  # already form a group -> add the total rabbits to the result
-                total_rabbits += (
-                    answers[i] + 1
-                )  # plus one to account for the rabbit that answer
-            freq[answers[i]] += 1
+		for i in range(n):
+			if answers[i] == 0:
+				total_rabbits += 1
+				continue
+			if freq[answers[i]] % (answers[i] + 1) == 0:  # already form a group -> add the total rabbits to the result
+				total_rabbits += answers[i] + 1  # plus one to account for the rabbit that answer
+			freq[answers[i]] += 1
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(n)
-        return total_rabbits
+		# Time Complexity: O(n)
+		# Space Complexity: O(n)
+		return total_rabbits

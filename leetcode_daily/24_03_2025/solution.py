@@ -13,29 +13,29 @@
 
 
 # Your solution starts here
-from typing import List
 import heapq
+from typing import List
 
 
 class Solution:
-    def countDays(self, days: int, meetings: List[List[int]]) -> int:
-        len(meetings)
-        total_free_days = 0
-        cur_max_occupied_day = 0
+	def countDays(self, days: int, meetings: List[List[int]]) -> int:
+		len(meetings)
+		total_free_days = 0
+		cur_max_occupied_day = 0
 
-        heapq.heapify(meetings)
+		heapq.heapify(meetings)
 
-        while len(meetings) != 0:
-            start_day, end_day = heapq.heappop(meetings)
-            if start_day <= cur_max_occupied_day:  # overlapped meetings
-                cur_max_occupied_day = max(cur_max_occupied_day, end_day)
-            else:
-                total_free_days += start_day - cur_max_occupied_day - 1
-                cur_max_occupied_day = end_day
+		while len(meetings) != 0:
+			start_day, end_day = heapq.heappop(meetings)
+			if start_day <= cur_max_occupied_day:  # overlapped meetings
+				cur_max_occupied_day = max(cur_max_occupied_day, end_day)
+			else:
+				total_free_days += start_day - cur_max_occupied_day - 1
+				cur_max_occupied_day = end_day
 
-        total_free_days += days - cur_max_occupied_day
+		total_free_days += days - cur_max_occupied_day
 
-        # Time complexity: O(nlogn)
-        # Space complexity: O(n)
+		# Time complexity: O(nlogn)
+		# Space complexity: O(n)
 
-        return total_free_days
+		return total_free_days

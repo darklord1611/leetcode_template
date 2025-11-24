@@ -22,20 +22,20 @@ from typing import List
 
 
 class Solution:
-    def divideString(self, s: str, k: int, fill: str) -> List[str]:
-        res = []
-        n = len(s)
-        cur = n
+	def divideString(self, s: str, k: int, fill: str) -> List[str]:
+		res = []
+		n = len(s)
+		cur = n
 
-        while cur % k != 0:
-            cur += 1
-            s = s + fill
+		while cur % k != 0:
+			cur += 1
+			s = s + fill
 
-        n = cur
-        cur = 0
+		n = cur
+		cur = 0
 
-        while cur < n:
-            res.append(s[cur : cur + k])
-            cur += k
+		while cur < n:
+			res.append(s[cur : cur + k])
+			cur += k
 
-        return res
+		return res

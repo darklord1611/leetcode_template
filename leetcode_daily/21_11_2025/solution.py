@@ -17,38 +17,38 @@
 
 
 class Solution:
-    def countPalindromicSubsequence(self, s: str) -> int:
-        # abcdedeabc
+	def countPalindromicSubsequence(self, s: str) -> int:
+		# abcdedeabc
 
-        # the subsequence would be in the form of XxX, we need a way to keep track of the frequencies of possible characters on the left and on the right of a particular index
+		# the subsequence would be in the form of XxX, we need a way to keep track of the frequencies of possible characters on the left and on the right of a particular index
 
-        # food for thought: what about counting in-between letters between two identical characters aka reverse the way we define the problem?
-        # What happened if the length of palindrome is not fixed to 3 and is arbitrary?
+		# food for thought: what about counting in-between letters between two identical characters aka reverse the way we define the problem?
+		# What happened if the length of palindrome is not fixed to 3 and is arbitrary?
 
-        prefix_freqs = []
-        n = len(s)
-        unique_subseq = set()
-        count = 0
-        total_freq = [0 for _ in range(26)]
+		prefix_freqs = []
+		n = len(s)
+		unique_subseq = set()
+		count = 0
+		total_freq = [0 for _ in range(26)]
 
-        for i in range(n):
-            total_freq[ord(s[i]) - ord("a")] += 1
+		for i in range(n):
+			total_freq[ord(s[i]) - ord("a")] += 1
 
-            prefix_freqs.append(list(total_freq))
+			prefix_freqs.append(list(total_freq))
 
-        for i in range(1, n - 1):
-            # the count arr of left of this index would be i - 1
-            for j in range(26):  # loop through every single X character
-                cur_subseq = chr(97 + j) + s[i] + chr(97 + j)
-                if cur_subseq in unique_subseq:
-                    continue
+		for i in range(1, n - 1):
+			# the count arr of left of this index would be i - 1
+			for j in range(26):  # loop through every single X character
+				cur_subseq = chr(97 + j) + s[i] + chr(97 + j)
+				if cur_subseq in unique_subseq:
+					continue
 
-                left_count = prefix_freqs[i - 1][j]
-                right_count = total_freq[j] - prefix_freqs[i][j]
-                if left_count > 0 and right_count > 0:
-                    count += 1
-                    unique_subseq.add(cur_subseq)
+				left_count = prefix_freqs[i - 1][j]
+				right_count = total_freq[j] - prefix_freqs[i][j]
+				if left_count > 0 and right_count > 0:
+					count += 1
+					unique_subseq.add(cur_subseq)
 
-        # Time complexity: O(n)
-        # Space complexity: O(n)
-        return count
+		# Time complexity: O(n)
+		# Space complexity: O(n)
+		return count

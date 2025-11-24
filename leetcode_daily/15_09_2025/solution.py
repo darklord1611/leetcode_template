@@ -14,18 +14,18 @@
 
 
 class Solution:
-    def canBeTypedWords(self, text: str, brokenLetters: str) -> int:
-        count = 0
-        words = text.split(" ")
+	def canBeTypedWords(self, text: str, brokenLetters: str) -> int:
+		count = 0
+		words = text.split(" ")
 
-        for word in words:
-            is_valid = True
-            for letter in brokenLetters:
-                if letter in word:
-                    is_valid = False
-                    break
+		for word in words:
+			is_valid = True
+			for letter in brokenLetters:
+				if letter in word:
+					is_valid = False
+					break
 
-            if is_valid:
-                count += 1
+			if is_valid:
+				count += 1
 
-        return count
+		return count

@@ -18,29 +18,29 @@ from typing import List
 
 
 class Solution:
-    def countGood(self, nums: List[int], k: int) -> int:
-        # subarrays -> sliding windows
-        # n identical elements -> how many pairs -> nC2
-        # adding an element will create k more pairs with k -> current count of element
-        # two pointers, moving the right ptr until we have a valid subarray, then adding any numbers will eventually create more valid arrays
+	def countGood(self, nums: List[int], k: int) -> int:
+		# subarrays -> sliding windows
+		# n identical elements -> how many pairs -> nC2
+		# adding an element will create k more pairs with k -> current count of element
+		# two pointers, moving the right ptr until we have a valid subarray, then adding any numbers will eventually create more valid arrays
 
-        freq = defaultdict(int)
-        n = len(nums)
+		freq = defaultdict(int)
+		n = len(nums)
 
-        num_pairs = 0
-        ans = 0
+		num_pairs = 0
+		ans = 0
 
-        left = 0
+		left = 0
 
-        for right in range(n):
-            num_pairs += freq[nums[right]]
-            freq[nums[right]] += 1
+		for right in range(n):
+			num_pairs += freq[nums[right]]
+			freq[nums[right]] += 1
 
-            while num_pairs >= k:
-                ans += n - right
+			while num_pairs >= k:
+				ans += n - right
 
-                freq[nums[left]] -= 1
-                num_pairs -= freq[nums[left]]
-                left += 1
+				freq[nums[left]] -= 1
+				num_pairs -= freq[nums[left]]
+				left += 1
 
-        return ans
+		return ans

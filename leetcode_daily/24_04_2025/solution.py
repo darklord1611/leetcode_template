@@ -24,30 +24,30 @@ from typing import List
 
 
 class Solution:
-    def countCompleteSubarrays(self, nums: List[int]) -> int:
-        # count the distinct numbers in the entire array
-        # sliding window -> notice that if the current window is satisfied then if we keep expanding, we would always have a satisfied subarray
-        # Example: [1, 2, 3, 3, 2, 2, 1]
-        # Suppose current window is [1, 2, 3] -> this subarray already satisfied, expanding to [1, 2, 3, 3] -> we only increase the count
-        # When the array is satisfied -> move the left boundary till we no longer have valid subrray
+	def countCompleteSubarrays(self, nums: List[int]) -> int:
+		# count the distinct numbers in the entire array
+		# sliding window -> notice that if the current window is satisfied then if we keep expanding, we would always have a satisfied subarray
+		# Example: [1, 2, 3, 3, 2, 2, 1]
+		# Suppose current window is [1, 2, 3] -> this subarray already satisfied, expanding to [1, 2, 3, 3] -> we only increase the count
+		# When the array is satisfied -> move the left boundary till we no longer have valid subrray
 
-        n = len(nums)
-        distinct_num_count = len(set(nums))
-        cur_distinct_count = 0
-        freq = defaultdict(int)
-        left = 0
-        res = 0
+		n = len(nums)
+		distinct_num_count = len(set(nums))
+		cur_distinct_count = 0
+		freq = defaultdict(int)
+		left = 0
+		res = 0
 
-        for right in range(n):
-            freq[nums[right]] += 1
-            if freq[nums[right]] == 1:
-                cur_distinct_count += 1
+		for right in range(n):
+			freq[nums[right]] += 1
+			if freq[nums[right]] == 1:
+				cur_distinct_count += 1
 
-            while cur_distinct_count >= distinct_num_count:
-                res += n - right
-                freq[nums[left]] -= 1
-                if freq[nums[left]] == 0:
-                    cur_distinct_count -= 1
-                left += 1
+			while cur_distinct_count >= distinct_num_count:
+				res += n - right
+				freq[nums[left]] -= 1
+				if freq[nums[left]] == 0:
+					cur_distinct_count -= 1
+				left += 1
 
-        return res
+		return res

@@ -32,57 +32,57 @@
 
 
 # Your solution starts here
-from typing import List
 from collections import defaultdict
+from typing import List
 
 from sortedcontainers import SortedSet
 
 
 class MovieRentingSystem:
-    def __init__(self, n: int, entries: List[List[int]]):  # O(nlogn)
-        # we need to keep track of unrented copies for a specific movie, sorted by price ascending and then also shop_id ascending
+	def __init__(self, n: int, entries: List[List[int]]):  # O(nlogn)
+		# we need to keep track of unrented copies for a specific movie, sorted by price ascending and then also shop_id ascending
 
-        # we also need to keep track of rented movies for the report, sorted according to the order (price, movie_id, shop_id)
+		# we also need to keep track of rented movies for the report, sorted according to the order (price, movie_id, shop_id)
 
-        # also maintain a lookup of (movie, shop) -> price
-        self.movie_shop_to_price = defaultdict(int)
-        self.rented_movies = SortedSet()
-        self.movie_to_price_shop = defaultdict(SortedSet)
+		# also maintain a lookup of (movie, shop) -> price
+		self.movie_shop_to_price = defaultdict(int)
+		self.rented_movies = SortedSet()
+		self.movie_to_price_shop = defaultdict(SortedSet)
 
-        for entry in entries:
-            shop, movie, price = entry
+		for entry in entries:
+			shop, movie, price = entry
 
-            self.movie_shop_to_price[(shop, movie)] = price
-            self.movie_to_price_shop[movie].add((price, shop))
+			self.movie_shop_to_price[(shop, movie)] = price
+			self.movie_to_price_shop[movie].add((price, shop))
 
-    def search(self, movie: int) -> List[int]:
-        top_5 = []
-        for price, shop in self.movie_to_price_shop[movie]:
-            top_5.append(shop)
+	def search(self, movie: int) -> List[int]:
+		top_5 = []
+		for price, shop in self.movie_to_price_shop[movie]:
+			top_5.append(shop)
 
-            if len(top_5) == 5:
-                break
-        return top_5
+			if len(top_5) == 5:
+				break
+		return top_5
 
-    def rent(self, shop: int, movie: int) -> None:  # O(logn)
-        price = self.movie_shop_to_price[(shop, movie)]
-        self.movie_to_price_shop[movie].discard((price, shop))
-        self.rented_movies.add((price, shop, movie))
+	def rent(self, shop: int, movie: int) -> None:  # O(logn)
+		price = self.movie_shop_to_price[(shop, movie)]
+		self.movie_to_price_shop[movie].discard((price, shop))
+		self.rented_movies.add((price, shop, movie))
 
-    def drop(self, shop: int, movie: int) -> None:  # O(logn)
-        price = self.movie_shop_to_price[(shop, movie)]
-        self.movie_to_price_shop[movie].add((price, shop))
-        self.rented_movies.discard((price, shop, movie))
+	def drop(self, shop: int, movie: int) -> None:  # O(logn)
+		price = self.movie_shop_to_price[(shop, movie)]
+		self.movie_to_price_shop[movie].add((price, shop))
+		self.rented_movies.discard((price, shop, movie))
 
-    def report(self) -> List[List[int]]:
-        top_rented = []
+	def report(self) -> List[List[int]]:
+		top_rented = []
 
-        for _, shop, movie in self.rented_movies:
-            top_rented.append([shop, movie])
-            if len(top_rented) == 5:
-                break
+		for _, shop, movie in self.rented_movies:
+			top_rented.append([shop, movie])
+			if len(top_rented) == 5:
+				break
 
-        return top_rented
+		return top_rented
 
 
 # Your MovieRentingSystem object will be instantiated and called as such:

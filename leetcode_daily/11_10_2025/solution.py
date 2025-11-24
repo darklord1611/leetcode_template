@@ -22,26 +22,22 @@ from typing import List
 
 
 class Solution:
-    def maximumTotalDamage(self, power: List[int]) -> int:
-        count = Counter(power)
-        vec = [(-(10**9), 0)]  # default element to smooth transition
+	def maximumTotalDamage(self, power: List[int]) -> int:
+		count = Counter(power)
+		vec = [(-(10**9), 0)]  # default element to smooth transition
 
-        for k in sorted(
-            count.keys()
-        ):  # we sort the count to simplify the range condition
-            vec.append((k, count[k]))
-        n = len(vec)
-        f = [0] * n
-        mx = 0
-        j = 1
-        for i in range(1, n):
-            while (
-                j < i and vec[j][0] < vec[i][0] - 2
-            ):  # keep advancing j until we found the best previous values just before the current index i
-                mx = max(mx, f[j])
-                j += 1
-            f[i] = mx + vec[i][0] * vec[i][1]
+		for k in sorted(count.keys()):  # we sort the count to simplify the range condition
+			vec.append((k, count[k]))
+		n = len(vec)
+		f = [0] * n
+		mx = 0
+		j = 1
+		for i in range(1, n):
+			while j < i and vec[j][0] < vec[i][0] - 2:  # keep advancing j until we found the best previous values just before the current index i
+				mx = max(mx, f[j])
+				j += 1
+			f[i] = mx + vec[i][0] * vec[i][1]
 
-        # Time Complexity: O(n log n) due to sorting the unique elements
-        # Space Complexity: O(n)
-        return max(f)
+		# Time Complexity: O(n log n) due to sorting the unique elements
+		# Space Complexity: O(n)
+		return max(f)

@@ -21,18 +21,16 @@
 
 
 class Solution:
-    def answerString(self, word: str, numFriends: int) -> str:
-        if numFriends == 1:  # one friend so we don't have to divide up
-            return word
+	def answerString(self, word: str, numFriends: int) -> str:
+		if numFriends == 1:  # one friend so we don't have to divide up
+			return word
 
-        # largest substring would be the one with either largest first character or largest size
-        # how to achieve largest size for a substring? by break down the string into numFriends parts, with the largest part of length: len(string) - numFriends + 1
+		# largest substring would be the one with either largest first character or largest size
+		# how to achieve largest size for a substring? by break down the string into numFriends parts, with the largest part of length: len(string) - numFriends + 1
 
-        n = len(word)
-        res = ""
-        for i in range(
-            n
-        ):  # consider all starting characters to be the first eligible choice for the required string
-            right_bound = min(i + n - numFriends + 1, n)
-            res = max(res, word[i:right_bound])
-        return res
+		n = len(word)
+		res = ""
+		for i in range(n):  # consider all starting characters to be the first eligible choice for the required string
+			right_bound = min(i + n - numFriends + 1, n)
+			res = max(res, word[i:right_bound])
+		return res

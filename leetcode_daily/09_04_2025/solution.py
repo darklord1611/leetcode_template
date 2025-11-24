@@ -26,21 +26,21 @@ from typing import List
 
 
 class Solution:
-    def minOperations(self, nums: List[int], k: int) -> int:
-        # if there is any number in the array less than k -> impossible
-        # keep the count of each elements
-        # problem can also be interpreted as returning number of DISTINCT integers GREATER than k
+	def minOperations(self, nums: List[int], k: int) -> int:
+		# if there is any number in the array less than k -> impossible
+		# keep the count of each elements
+		# problem can also be interpreted as returning number of DISTINCT integers GREATER than k
 
-        unique_nums = set(nums)
-        len(unique_nums)
-        max_ops = 0
-        for num in unique_nums:
-            if num < k:
-                return -1
-            elif num > k:
-                max_ops += 1
+		unique_nums = set(nums)
+		len(unique_nums)
+		max_ops = 0
+		for num in unique_nums:
+			if num < k:
+				return -1
+			elif num > k:
+				max_ops += 1
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(n)
+		# Time Complexity: O(n)
+		# Space Complexity: O(n)
 
-        return max_ops
+		return max_ops

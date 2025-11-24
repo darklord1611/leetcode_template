@@ -15,24 +15,24 @@ from typing import List
 
 
 class Solution:
-    def lexicalOrder(self, n: int) -> List[int]:
-        # DFS, start from 1, keep adding numbers to it, 1 -> 10, 11, -> ... 100 only if it < n
+	def lexicalOrder(self, n: int) -> List[int]:
+		# DFS, start from 1, keep adding numbers to it, 1 -> 10, 11, -> ... 100 only if it < n
 
-        res = []
+		res = []
 
-        def dfs(i: str):
-            if int(i) > n:
-                return
+		def dfs(i: str):
+			if int(i) > n:
+				return
 
-            res.append(int(i))
+			res.append(int(i))
 
-            for j in range(0, 10):
-                dfs(f"{i}{j}")
+			for j in range(0, 10):
+				dfs(f"{i}{j}")
 
-            return
+			return
 
-        for i in range(1, 10):
-            dfs(i)
+		for i in range(1, 10):
+			dfs(i)
 
-        # Time complexity: O(n)
-        return res
+		# Time complexity: O(n)
+		return res

@@ -19,26 +19,26 @@ from typing import List
 
 
 class Solution:
-    def numberOfBeams(self, bank: List[str]) -> int:
-        # count the number of laser beams at each floor -> multiply
+	def numberOfBeams(self, bank: List[str]) -> int:
+		# count the number of laser beams at each floor -> multiply
 
-        n = len(bank)
-        floors = []
+		n = len(bank)
+		floors = []
 
-        for i in range(n):
-            count = 0
-            for char in bank[i]:
-                if char == "1":
-                    count += 1
+		for i in range(n):
+			count = 0
+			for char in bank[i]:
+				if char == "1":
+					count += 1
 
-            if count != 0:
-                floors.append(count)
+			if count != 0:
+				floors.append(count)
 
-        if len(floors) == 1:
-            return 0
+		if len(floors) == 1:
+			return 0
 
-        num_beams = 0
-        for i in range(1, len(floors)):
-            num_beams += floors[i - 1] * floors[i]
+		num_beams = 0
+		for i in range(1, len(floors)):
+			num_beams += floors[i - 1] * floors[i]
 
-        return num_beams
+		return num_beams

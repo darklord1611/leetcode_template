@@ -26,24 +26,24 @@ from typing import List
 
 
 class Solution:
-    def countGoodTriplets(self, arr: List[int], a: int, b: int, c: int) -> int:
-        # -a <= a[i] - a[j] <= a
-        # -b <= a[j] - a[k] <= b
-        # -c <= a[i] - a[k] <= c
+	def countGoodTriplets(self, arr: List[int], a: int, b: int, c: int) -> int:
+		# -a <= a[i] - a[j] <= a
+		# -b <= a[j] - a[k] <= b
+		# -c <= a[i] - a[k] <= c
 
-        count = 0
-        n = len(arr)
-        for i in range(n):
-            for j in range(i + 1, n):
-                if arr[i] - arr[j] < -a or arr[i] - arr[j] > a:
-                    continue
-                for k in range(j + 1, n):
-                    if arr[j] - arr[k] < -b or arr[j] - arr[k] > b:
-                        continue
+		count = 0
+		n = len(arr)
+		for i in range(n):
+			for j in range(i + 1, n):
+				if arr[i] - arr[j] < -a or arr[i] - arr[j] > a:
+					continue
+				for k in range(j + 1, n):
+					if arr[j] - arr[k] < -b or arr[j] - arr[k] > b:
+						continue
 
-                    if arr[i] - arr[k] < -c or arr[i] - arr[k] > c:
-                        continue
+					if arr[i] - arr[k] < -c or arr[i] - arr[k] > c:
+						continue
 
-                    count += 1
+					count += 1
 
-        return count
+		return count

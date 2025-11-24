@@ -12,22 +12,20 @@
 
 # Your solution starts here
 class Solution:
-    def possibleStringCount(self, word: str) -> int:
-        cur_char = ""
-        cur_count = 1
-        res = 0
-        for char in word:
-            if char == cur_char:
-                cur_count += 1
-            else:
-                res += cur_count - 1  # the character appears at most once
-                cur_char = char
-                cur_count = 1
+	def possibleStringCount(self, word: str) -> int:
+		cur_char = ""
+		cur_count = 1
+		res = 0
+		for char in word:
+			if char == cur_char:
+				cur_count += 1
+			else:
+				res += cur_count - 1  # the character appears at most once
+				cur_char = char
+				cur_count = 1
 
-        res += (
-            cur_count - 1
-        )  # account for the last possible sequence of identical characters
+		res += cur_count - 1  # account for the last possible sequence of identical characters
 
-        res += 1  # account for the original string where there are no typos
+		res += 1  # account for the original string where there are no typos
 
-        return res
+		return res

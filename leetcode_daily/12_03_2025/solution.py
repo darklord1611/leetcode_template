@@ -22,19 +22,19 @@ from typing import List
 
 
 class Solution:
-    def maximumCount(self, nums: List[int]) -> int:
-        pos_count = 0
-        neg_count = 0
+	def maximumCount(self, nums: List[int]) -> int:
+		pos_count = 0
+		neg_count = 0
 
-        n = len(nums)
+		n = len(nums)
 
-        for i in range(n):
-            if nums[i] > 0:
-                pos_count += 1
-            elif nums[i] < 0:
-                neg_count += 1
+		for i in range(n):
+			if nums[i] > 0:
+				pos_count += 1
+			elif nums[i] < 0:
+				neg_count += 1
 
-        return max(pos_count, neg_count)
+		return max(pos_count, neg_count)
 
 
 # Optimized solution using binary search -> find the first and last zero index

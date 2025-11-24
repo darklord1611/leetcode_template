@@ -17,52 +17,52 @@
 
 
 # Your solution starts here
-from typing import List
 from collections import deque
+from typing import List
 
 
 class Solution:
-    def closestMeetingNode(self, edges: List[int], node1: int, node2: int) -> int:
-        # we have two nodes: A and B
-        # we need to find another node C (reachable from A and B) so that max(dis(A, C), dis(B, C)) is minimized
-        # first step would be finding all the mutual nodes that reachable from both A and B
-        # then we check for each satisfied node and find the min dist
+	def closestMeetingNode(self, edges: List[int], node1: int, node2: int) -> int:
+		# we have two nodes: A and B
+		# we need to find another node C (reachable from A and B) so that max(dis(A, C), dis(B, C)) is minimized
+		# first step would be finding all the mutual nodes that reachable from both A and B
+		# then we check for each satisfied node and find the min dist
 
-        n = len(edges)
-        adj_list = [[] for _ in range(n)]
-        min_dist = float("inf")
-        min_idx = -1
-        for i in range(n):
-            if edges[i] != -1:
-                adj_list[i].append(edges[i])
+		n = len(edges)
+		adj_list = [[] for _ in range(n)]
+		min_dist = float("inf")
+		min_idx = -1
+		for i in range(n):
+			if edges[i] != -1:
+				adj_list[i].append(edges[i])
 
-        def calc_dist(node):
-            node_dist = {}
-            visited = [0 for _ in range(n)]
-            queue = deque()
-            queue.append(node)
-            cur_dist = 0
-            while len(queue) != 0:
-                for i in range(len(queue)):
-                    cur_node = queue.popleft()
-                    node_dist[cur_node] = cur_dist
-                    visited[cur_node] = 1
-                    # add the neighbor of current node
-                    for adj_node in adj_list[cur_node]:
-                        if not visited[adj_node]:  # account for cycle
-                            queue.append(adj_node)
-                cur_dist += 1
+		def calc_dist(node):
+			node_dist = {}
+			visited = [0 for _ in range(n)]
+			queue = deque()
+			queue.append(node)
+			cur_dist = 0
+			while len(queue) != 0:
+				for i in range(len(queue)):
+					cur_node = queue.popleft()
+					node_dist[cur_node] = cur_dist
+					visited[cur_node] = 1
+					# add the neighbor of current node
+					for adj_node in adj_list[cur_node]:
+						if not visited[adj_node]:  # account for cycle
+							queue.append(adj_node)
+				cur_dist += 1
 
-            return node_dist
+			return node_dist
 
-        node1_dist = calc_dist(node1)
-        node2_dist = calc_dist(node2)
+		node1_dist = calc_dist(node1)
+		node2_dist = calc_dist(node2)
 
-        for i in range(n):
-            if i in node1_dist and i in node2_dist:
-                cur_dist = max(node1_dist[i], node2_dist[i])
-                if cur_dist < min_dist:
-                    min_dist = cur_dist
-                    min_idx = i
+		for i in range(n):
+			if i in node1_dist and i in node2_dist:
+				cur_dist = max(node1_dist[i], node2_dist[i])
+				if cur_dist < min_dist:
+					min_dist = cur_dist
+					min_idx = i
 
-        return min_idx
+		return min_idx

@@ -16,22 +16,22 @@
 
 
 class Solution:
-    def makeFancyString(self, s: str) -> str:
-        n = len(s)
-        cur_char = s[0]
-        count = 1
-        res = [cur_char]
+	def makeFancyString(self, s: str) -> str:
+		n = len(s)
+		cur_char = s[0]
+		count = 1
+		res = [cur_char]
 
-        for i in range(1, n):
-            if s[i] == cur_char:
-                count += 1
-            else:
-                cur_char = s[i]
-                count = 1
+		for i in range(1, n):
+			if s[i] == cur_char:
+				count += 1
+			else:
+				cur_char = s[i]
+				count = 1
 
-            if count >= 3:
-                continue
+			if count >= 3:
+				continue
 
-            res.append(s[i])
+			res.append(s[i])
 
-        return "".join(res)
+		return "".join(res)

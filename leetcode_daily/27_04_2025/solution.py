@@ -13,18 +13,18 @@ from typing import List
 
 
 class Solution:
-    def countSubarrays(self, nums: List[int]) -> int:
-        # sliding window
+	def countSubarrays(self, nums: List[int]) -> int:
+		# sliding window
 
-        n = len(nums)
-        left = 0
-        count = 0
-        for right in range(n):
-            if right - left + 1 == 3:
-                if nums[right] + nums[left] == nums[left + 1] / 2:
-                    count += 1
-                left += 1
+		n = len(nums)
+		left = 0
+		count = 0
+		for right in range(n):
+			if right - left + 1 == 3:
+				if nums[right] + nums[left] == nums[left + 1] / 2:
+					count += 1
+				left += 1
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(1)
-        return count
+		# Time Complexity: O(n)
+		# Space Complexity: O(1)
+		return count

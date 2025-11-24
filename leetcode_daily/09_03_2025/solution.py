@@ -23,25 +23,25 @@ from typing import List
 
 # Your solution starts here
 class Solution:
-    def numberOfAlternatingGroups(self, colors: List[int], k: int) -> int:
-        n = len(colors)
+	def numberOfAlternatingGroups(self, colors: List[int], k: int) -> int:
+		n = len(colors)
 
-        group_count = 0
+		group_count = 0
 
-        # loop from -(k - 1) to n - 1 -> cover the entire circle
-        start_index = -(k - 1)
-        expected_num = 1 - colors[start_index]
-        left = start_index
-        for right in range(start_index + 1, n):
-            if colors[right] != expected_num:
-                left = right
-                expected_num = 1 - colors[right]
-                continue
+		# loop from -(k - 1) to n - 1 -> cover the entire circle
+		start_index = -(k - 1)
+		expected_num = 1 - colors[start_index]
+		left = start_index
+		for right in range(start_index + 1, n):
+			if colors[right] != expected_num:
+				left = right
+				expected_num = 1 - colors[right]
+				continue
 
-            if right - left + 1 == k:
-                group_count += 1
-                left += 1
+			if right - left + 1 == k:
+				group_count += 1
+				left += 1
 
-            expected_num = 1 - colors[right]
+			expected_num = 1 - colors[right]
 
-        return group_count
+		return group_count

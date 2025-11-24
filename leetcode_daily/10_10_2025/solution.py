@@ -21,21 +21,21 @@ from typing import List
 
 
 class Solution:
-    def maximumEnergy(self, energy: List[int], k: int) -> int:
-        n = len(energy)
-        suffix_sum = [-1 for _ in range(n)]
-        max_energy = -float("inf")
-        # k last elements initilized to be the same values in energy
+	def maximumEnergy(self, energy: List[int], k: int) -> int:
+		n = len(energy)
+		suffix_sum = [-1 for _ in range(n)]
+		max_energy = -float("inf")
+		# k last elements initilized to be the same values in energy
 
-        for i in range(n - 1, n - 1 - k, -1):
-            suffix_sum[i] = energy[i]
+		for i in range(n - 1, n - 1 - k, -1):
+			suffix_sum[i] = energy[i]
 
-        for i in range(n - 1 - k, -1, -1):
-            suffix_sum[i] = suffix_sum[i + k] + energy[i]
+		for i in range(n - 1 - k, -1, -1):
+			suffix_sum[i] = suffix_sum[i + k] + energy[i]
 
-        for i in range(n):
-            max_energy = max(max_energy, suffix_sum[i])
+		for i in range(n):
+			max_energy = max(max_energy, suffix_sum[i])
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(n)
-        return max_energy
+		# Time Complexity: O(n)
+		# Space Complexity: O(n)
+		return max_energy

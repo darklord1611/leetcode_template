@@ -19,23 +19,23 @@ from typing import Optional
 
 # Definition for singly-linked list.
 class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+	def __init__(self, val=0, next=None):
+		self.val = val
+		self.next = next
 
 
 class Solution:
-    def getDecimalValue(self, head: Optional[ListNode]) -> int:
-        bin_list = []
-        ans = 0
-        cur_node = head
+	def getDecimalValue(self, head: Optional[ListNode]) -> int:
+		bin_list = []
+		ans = 0
+		cur_node = head
 
-        while cur_node is not None:
-            bin_list.append(cur_node.val)
-            cur_node = cur_node.next
+		while cur_node is not None:
+			bin_list.append(cur_node.val)
+			cur_node = cur_node.next
 
-        n = len(bin_list)
-        for i in range(n - 1, -1, -1):
-            ans += 2 ** (n - 1 - i) * bin_list[i]
+		n = len(bin_list)
+		for i in range(n - 1, -1, -1):
+			ans += 2 ** (n - 1 - i) * bin_list[i]
 
-        return ans
+		return ans

@@ -27,58 +27,56 @@ from typing import List
 
 
 class Solution:
-    def checkValidCuts(self, n: int, rectangles: List[List[int]]) -> bool:
-        # we can either slice horizontally or vertically -> try both
-        # Example 1
-        # x-axis: [1, 5], [0, 2], [3, 5], [0, 4]
-        # y-axis: [0, 2], [2, 4], [2, 3], [4, 5]
-        # if slicing is possible then we would find a way to combine these above intervals into 3 separate intervals
-        # y-axis -> [0, 2], [2, 4], [4, 5] -> 3 -> valid
-        # x-axis -> [0, 4], [1, 5] -> 2 -> invalid
+	def checkValidCuts(self, n: int, rectangles: List[List[int]]) -> bool:
+		# we can either slice horizontally or vertically -> try both
+		# Example 1
+		# x-axis: [1, 5], [0, 2], [3, 5], [0, 4]
+		# y-axis: [0, 2], [2, 4], [2, 3], [4, 5]
+		# if slicing is possible then we would find a way to combine these above intervals into 3 separate intervals
+		# y-axis -> [0, 2], [2, 4], [4, 5] -> 3 -> valid
+		# x-axis -> [0, 4], [1, 5] -> 2 -> invalid
 
-        # Example 2
-        # x-axis: [0, 1], [2, 3], [0, 2], [3, 4] -> [0, 2], [2, 3], [3, 4] -> valid
-        # y-axis: [0, 1], [0, 4], [2, 3], [0, 3] -> [0, 4] -> invalid
+		# Example 2
+		# x-axis: [0, 1], [2, 3], [0, 2], [3, 4] -> [0, 2], [2, 3], [3, 4] -> valid
+		# y-axis: [0, 1], [0, 4], [2, 3], [0, 3] -> [0, 4] -> invalid
 
-        x_intervals = []
-        y_intervals = []
+		x_intervals = []
+		y_intervals = []
 
-        len(rectangles)
+		len(rectangles)
 
-        for rec in rectangles:
-            x_intervals.append([rec[0], rec[2]])
-            y_intervals.append([rec[1], rec[3]])
+		for rec in rectangles:
+			x_intervals.append([rec[0], rec[2]])
+			y_intervals.append([rec[1], rec[3]])
 
-        slicing_vertical_possible = self.check_interval(x_intervals)
-        slicing_horizontal_possible = self.check_interval(y_intervals)
+		slicing_vertical_possible = self.check_interval(x_intervals)
+		slicing_horizontal_possible = self.check_interval(y_intervals)
 
-        if slicing_vertical_possible or slicing_horizontal_possible:
-            return True
+		if slicing_vertical_possible or slicing_horizontal_possible:
+			return True
 
-        return False
+		return False
 
-    def check_interval(self, intervals: List[List[int]]) -> bool:
-        n = len(intervals)
-        res = []
-        intervals.sort()
+	def check_interval(self, intervals: List[List[int]]) -> bool:
+		n = len(intervals)
+		res = []
+		intervals.sort()
 
-        min_overlap_num = intervals[0][0]
-        max_overlap_num = intervals[0][1]
+		min_overlap_num = intervals[0][0]
+		max_overlap_num = intervals[0][1]
 
-        for i in range(1, n):
-            if (
-                intervals[i][0] < max_overlap_num
-            ):  # why there no equal sign? because we want to maintain the intervals that share the same end and start coordinate
-                max_overlap_num = max(max_overlap_num, intervals[i][1])
-            else:
-                res.append([min_overlap_num, max_overlap_num])
-                min_overlap_num = intervals[i][0]
-                max_overlap_num = intervals[i][1]
+		for i in range(1, n):
+			if intervals[i][0] < max_overlap_num:  # why there no equal sign? because we want to maintain the intervals that share the same end and start coordinate
+				max_overlap_num = max(max_overlap_num, intervals[i][1])
+			else:
+				res.append([min_overlap_num, max_overlap_num])
+				min_overlap_num = intervals[i][0]
+				max_overlap_num = intervals[i][1]
 
-        res.append([min_overlap_num, max_overlap_num])
+		res.append([min_overlap_num, max_overlap_num])
 
-        # Time complexity: O(nlogn)
-        # Space complexity: O(n)
+		# Time complexity: O(nlogn)
+		# Space complexity: O(n)
 
-        # why does it still satisfy if we have more than 3 intervals after merged? draw them out
-        return True if len(res) >= 3 else False
+		# why does it still satisfy if we have more than 3 intervals after merged? draw them out
+		return True if len(res) >= 3 else False

@@ -28,30 +28,30 @@
 
 # Your solution starts here
 class Solution:
-    def isValid(self, word: str) -> bool:
-        if len(word) < 3:
-            return False
+	def isValid(self, word: str) -> bool:
+		if len(word) < 3:
+			return False
 
-        vowels = ["a", "e", "i", "o", "u"]
-        vowel_count = 0
-        consonant_count = 0
+		vowels = ["a", "e", "i", "o", "u"]
+		vowel_count = 0
+		consonant_count = 0
 
-        for char in word:
-            code_point = ord(char.lower())
-            if 48 <= code_point <= 57:
-                continue
-            if 97 <= code_point <= 122:
-                if char.lower() in vowels:
-                    vowel_count += 1
-                else:
-                    consonant_count += 1
-            else:
-                return False
+		for char in word:
+			code_point = ord(char.lower())
+			if 48 <= code_point <= 57:
+				continue
+			if 97 <= code_point <= 122:
+				if char.lower() in vowels:
+					vowel_count += 1
+				else:
+					consonant_count += 1
+			else:
+				return False
 
-        if vowel_count == 0:
-            return False
+		if vowel_count == 0:
+			return False
 
-        if consonant_count == 0:
-            return False
+		if consonant_count == 0:
+			return False
 
-        return True
+		return True

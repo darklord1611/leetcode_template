@@ -17,26 +17,26 @@ from collections import defaultdict
 
 
 class Solution:
-    def countLargestGroup(self, n: int) -> int:
-        group_sums = defaultdict(int)
+	def countLargestGroup(self, n: int) -> int:
+		group_sums = defaultdict(int)
 
-        for i in range(1, n + 1):
-            temp = i
-            cur_sum = 0
-            while temp != 0:
-                cur_sum += temp % 10
-                temp = temp // 10
+		for i in range(1, n + 1):
+			temp = i
+			cur_sum = 0
+			while temp != 0:
+				cur_sum += temp % 10
+				temp = temp // 10
 
-            group_sums[cur_sum] += 1
+			group_sums[cur_sum] += 1
 
-        max_group_size = 0
-        max_group_count = 0
+		max_group_size = 0
+		max_group_count = 0
 
-        for key in group_sums:
-            if max_group_size < group_sums[key]:
-                max_group_size = group_sums[key]
-                max_group_count = 1
-            elif max_group_size == group_sums[key]:
-                max_group_count += 1
+		for key in group_sums:
+			if max_group_size < group_sums[key]:
+				max_group_size = group_sums[key]
+				max_group_count = 1
+			elif max_group_size == group_sums[key]:
+				max_group_count += 1
 
-        return max_group_count
+		return max_group_count

@@ -16,12 +16,12 @@ from typing import List
 
 
 class Solution:
-    def findLucky(self, arr: List[int]) -> int:
-        count = Counter(arr)
-        max_val = -1
+	def findLucky(self, arr: List[int]) -> int:
+		count = Counter(arr)
+		max_val = -1
 
-        for num in count:
-            if count[num] == num:
-                max_val = max(num, max_val)
+		for num in count:
+			if count[num] == num:
+				max_val = max(num, max_val)
 
-        return max_val
+		return max_val

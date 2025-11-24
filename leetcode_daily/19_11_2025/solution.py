@@ -15,18 +15,17 @@
 
 # Your solution starts here
 from collections import defaultdict
-
 from typing import List
 
 
 class Solution:
-    def findFinalValue(self, nums: List[int], original: int) -> int:
-        freq = defaultdict(int)
-        cur_ans = original
-        for num in nums:
-            freq[num] += 1
+	def findFinalValue(self, nums: List[int], original: int) -> int:
+		freq = defaultdict(int)
+		cur_ans = original
+		for num in nums:
+			freq[num] += 1
 
-        while freq[cur_ans] != 0:
-            cur_ans = cur_ans * 2
+		while freq[cur_ans] != 0:
+			cur_ans = cur_ans * 2
 
-        return cur_ans
+		return cur_ans

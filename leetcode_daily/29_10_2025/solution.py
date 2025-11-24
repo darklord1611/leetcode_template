@@ -9,14 +9,14 @@
 
 
 class Solution:
-    def smallestNumber(self, n: int) -> int:
-        max_exp = 11
-        ans = -1
+	def smallestNumber(self, n: int) -> int:
+		max_exp = 11
+		ans = -1
 
-        for i in range(max_exp):
-            cur = 2**i
-            if cur > n:
-                ans = cur - 1
-                break
+		for i in range(max_exp):
+			cur = 2**i
+			if cur > n:
+				ans = cur - 1
+				break
 
-        return ans
+		return ans

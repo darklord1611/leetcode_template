@@ -15,31 +15,29 @@
 
 
 # Your solution starts here
-from typing import List
 import math
+from typing import List
 
 
 class Solution:
-    def minimumOperations(self, nums: List[int]) -> int:
-        # keep track of the count and also the latest index of each number -> find the largest duplicate index
-        # the latest index or the near-to-last index should we remove?
-        # why not iterate from the end? -> much easier lol :v
-        freq = {}
-        prev_indexes = {}
-        max_duplicate_index = -1
-        n = len(nums)
-        for i in range(n):
-            if nums[i] not in freq:
-                freq[nums[i]] = [1, i]
-            else:
-                freq[nums[i]][0] += 1
-                prev_indexes[nums[i]] = freq[nums[i]][1]
-                freq[nums[i]][1] = i
+	def minimumOperations(self, nums: List[int]) -> int:
+		# keep track of the count and also the latest index of each number -> find the largest duplicate index
+		# the latest index or the near-to-last index should we remove?
+		# why not iterate from the end? -> much easier lol :v
+		freq = {}
+		prev_indexes = {}
+		max_duplicate_index = -1
+		n = len(nums)
+		for i in range(n):
+			if nums[i] not in freq:
+				freq[nums[i]] = [1, i]
+			else:
+				freq[nums[i]][0] += 1
+				prev_indexes[nums[i]] = freq[nums[i]][1]
+				freq[nums[i]][1] = i
 
-        for key in freq:
-            if freq[key][0] >= 2:
-                max_duplicate_index = max(max_duplicate_index, prev_indexes[key])
+		for key in freq:
+			if freq[key][0] >= 2:
+				max_duplicate_index = max(max_duplicate_index, prev_indexes[key])
 
-        return math.ceil(
-            (max_duplicate_index + 1) / 3
-        )  # plus one indicates number of elements that we remove
+		return math.ceil((max_duplicate_index + 1) / 3)  # plus one indicates number of elements that we remove

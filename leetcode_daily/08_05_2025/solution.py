@@ -16,45 +16,43 @@
 
 # Your solution starts here
 
-from typing import List
 import heapq
+from typing import List
 
 
 class Solution:
-    def minTimeToReach(self, moveTime: List[List[int]]) -> int:
-        # SFT problem, non-negative weights -> Dijkstra
-        # Single-Source Single-Target Shortest Path
-        n = len(moveTime)
-        m = len(moveTime[0])
+	def minTimeToReach(self, moveTime: List[List[int]]) -> int:
+		# SFT problem, non-negative weights -> Dijkstra
+		# Single-Source Single-Target Shortest Path
+		n = len(moveTime)
+		m = len(moveTime[0])
 
-        dirs = [(-1, 0), (0, -1), (1, 0), (0, 1)]
-        queue = [(0, 0, 0, 1)]
-        visited = set((0, 0))
-        min_time = 0
+		dirs = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+		queue = [(0, 0, 0, 1)]
+		visited = set((0, 0))
+		min_time = 0
 
-        while len(queue) != 0:
-            time, x, y, adjacent_move_time = heapq.heappop(queue)
-            min_time = max(time, min_time)
+		while len(queue) != 0:
+			time, x, y, adjacent_move_time = heapq.heappop(queue)
+			min_time = max(time, min_time)
 
-            if x == n - 1 and y == m - 1:
-                break
+			if x == n - 1 and y == m - 1:
+				break
 
-            # check adjacent future cells
-            for dx, dy in dirs:
-                new_x, new_y = x + dx, y + dy
-                if (new_x, new_y) in visited:
-                    continue
+			# check adjacent future cells
+			for dx, dy in dirs:
+				new_x, new_y = x + dx, y + dy
+				if (new_x, new_y) in visited:
+					continue
 
-                if new_x < 0 or new_x >= n or new_y < 0 or new_y >= m:
-                    continue
-                # minimum time to reach the cell, either the time we can start moving to current cell OR the maximum start time of other cells we have already traversed, which ever is greater
-                min_time_reach_current_cell = (
-                    max(min_time, moveTime[new_x][new_y]) + adjacent_move_time
-                )
-                heapq.heappush(
-                    queue,
-                    (min_time_reach_current_cell, new_x, new_y, 3 - adjacent_move_time),
-                )
-                visited.add((new_x, new_y))
+				if new_x < 0 or new_x >= n or new_y < 0 or new_y >= m:
+					continue
+				# minimum time to reach the cell, either the time we can start moving to current cell OR the maximum start time of other cells we have already traversed, which ever is greater
+				min_time_reach_current_cell = max(min_time, moveTime[new_x][new_y]) + adjacent_move_time
+				heapq.heappush(
+					queue,
+					(min_time_reach_current_cell, new_x, new_y, 3 - adjacent_move_time),
+				)
+				visited.add((new_x, new_y))
 
-        return min_time
+		return min_time

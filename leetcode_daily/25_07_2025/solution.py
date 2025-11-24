@@ -23,26 +23,26 @@ from typing import List
 
 
 class Solution:
-    def maxSum(self, nums: List[int]) -> int:
-        # set negative numbers to zeroes -> effectively remove them from final subarray sum
-        # then make every element unique by also set any duplicate values to zeroes
-        # becareful, if we perform the above two operations, we would end up with an array of multiple zeroes -> go further and conceptually remove all zeroes, we will be left with only positive values -> sum them up and return
-        # need to check for an array of full negative values
+	def maxSum(self, nums: List[int]) -> int:
+		# set negative numbers to zeroes -> effectively remove them from final subarray sum
+		# then make every element unique by also set any duplicate values to zeroes
+		# becareful, if we perform the above two operations, we would end up with an array of multiple zeroes -> go further and conceptually remove all zeroes, we will be left with only positive values -> sum them up and return
+		# need to check for an array of full negative values
 
-        max_val = max(nums)
+		max_val = max(nums)
 
-        if max_val <= 0:
-            return max_val
+		if max_val <= 0:
+			return max_val
 
-        freq = defaultdict(int)
-        n = len(nums)
+		freq = defaultdict(int)
+		n = len(nums)
 
-        for i in range(n):
-            if nums[i] <= 0 or freq[nums[i]] >= 1:
-                nums[i] = 0
-            else:
-                freq[nums[i]] += 1
+		for i in range(n):
+			if nums[i] <= 0 or freq[nums[i]] >= 1:
+				nums[i] = 0
+			else:
+				freq[nums[i]] += 1
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(n)
-        return sum(nums)
+		# Time Complexity: O(n)
+		# Space Complexity: O(n)
+		return sum(nums)

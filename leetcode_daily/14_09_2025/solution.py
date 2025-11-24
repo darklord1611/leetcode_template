@@ -45,49 +45,49 @@ from typing import List
 
 
 class Solution:
-    def spellchecker(self, wordlist: List[str], queries: List[str]) -> List[str]:
-        # two kind of errors, capitalization -> YeLLow instead of yellow
-        # vowel errors -> Yallow instead of yellow
+	def spellchecker(self, wordlist: List[str], queries: List[str]) -> List[str]:
+		# two kind of errors, capitalization -> YeLLow instead of yellow
+		# vowel errors -> Yallow instead of yellow
 
-        # so we loop through the word list for each query, check against two types of errors and return if possible
+		# so we loop through the word list for each query, check against two types of errors and return if possible
 
-        # create 3 hashmaps to store 3 version of the same strings
+		# create 3 hashmaps to store 3 version of the same strings
 
-        # priority-based -> 0 -> exact match, 1 -> capitalization error, 2 -> vowel error, 3 -> none match
+		# priority-based -> 0 -> exact match, 1 -> capitalization error, 2 -> vowel error, 3 -> none match
 
-        def remove_vowel(word):
-            return "".join("*" if c in "aeiou" else c for c in word)
+		def remove_vowel(word):
+			return "".join("*" if c in "aeiou" else c for c in word)
 
-        exact_words = set(wordlist)
-        words_cap = {}
-        words_vow = {}
-        ans = []
+		exact_words = set(wordlist)
+		words_cap = {}
+		words_vow = {}
+		ans = []
 
-        for word in wordlist:
-            word_low = word.lower()
-            word_low_devowel = remove_vowel(word_low)
+		for word in wordlist:
+			word_low = word.lower()
+			word_low_devowel = remove_vowel(word_low)
 
-            if word_low not in words_cap.keys():
-                words_cap[word_low] = word
+			if word_low not in words_cap.keys():
+				words_cap[word_low] = word
 
-            if word_low_devowel not in words_vow.keys():
-                words_vow[word_low_devowel] = word
+			if word_low_devowel not in words_vow.keys():
+				words_vow[word_low_devowel] = word
 
-        for query in queries:
-            if query in exact_words:
-                ans.append(query)
-                continue
+		for query in queries:
+			if query in exact_words:
+				ans.append(query)
+				continue
 
-            query_low = query.lower()
-            if query_low in words_cap:
-                ans.append(words_cap[query_low])
-                continue
+			query_low = query.lower()
+			if query_low in words_cap:
+				ans.append(words_cap[query_low])
+				continue
 
-            query_low_devowel = remove_vowel(query_low)
-            if query_low_devowel in words_vow:
-                ans.append(words_vow[query_low_devowel])
-                continue
+			query_low_devowel = remove_vowel(query_low)
+			if query_low_devowel in words_vow:
+				ans.append(words_vow[query_low_devowel])
+				continue
 
-            ans.append("")
+			ans.append("")
 
-        return ans
+		return ans

@@ -8,14 +8,14 @@
 
 # Your solution starts here
 class Solution:
-    def numWaterBottles(self, numBottles: int, numExchange: int) -> int:
-        max_bottle = numBottles
+	def numWaterBottles(self, numBottles: int, numExchange: int) -> int:
+		max_bottle = numBottles
 
-        empty = numBottles
+		empty = numBottles
 
-        while empty >= numExchange:
-            max_bottle += empty // numExchange
+		while empty >= numExchange:
+			max_bottle += empty // numExchange
 
-            empty = empty // numExchange + empty % numExchange
+			empty = empty // numExchange + empty % numExchange
 
-        return max_bottle
+		return max_bottle

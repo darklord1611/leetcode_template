@@ -28,30 +28,30 @@ from typing import List
 
 
 class Solution:
-    def numberOfArrays(self, differences: List[int], lower: int, upper: int) -> int:
-        # diff array of length n -> generate hidden sequence of length n + 1
-        # choices are deterministic -> if we choose the first number to be a -> there is only 1 hidden sequence constructed by following the diff array
-        # valid choices? -> satisfy the diff array + each number in [lower, upper]
-        # Generate all choices recursively, keep track of the min and max -> check?
+	def numberOfArrays(self, differences: List[int], lower: int, upper: int) -> int:
+		# diff array of length n -> generate hidden sequence of length n + 1
+		# choices are deterministic -> if we choose the first number to be a -> there is only 1 hidden sequence constructed by following the diff array
+		# valid choices? -> satisfy the diff array + each number in [lower, upper]
+		# Generate all choices recursively, keep track of the min and max -> check?
 
-        n = len(differences)
-        prefix_sum_diffs = [-1 for _ in range(n)]
-        prefix_sum_diffs[0] = differences[0]
-        min_diff = prefix_sum_diffs[0]
-        max_diff = prefix_sum_diffs[0]
-        total_count = 0
+		n = len(differences)
+		prefix_sum_diffs = [-1 for _ in range(n)]
+		prefix_sum_diffs[0] = differences[0]
+		min_diff = prefix_sum_diffs[0]
+		max_diff = prefix_sum_diffs[0]
+		total_count = 0
 
-        for i in range(1, n):
-            prefix_sum_diffs[i] = prefix_sum_diffs[i - 1] + differences[i]
-            min_diff = min(prefix_sum_diffs[i], min_diff)
-            max_diff = max(prefix_sum_diffs[i], max_diff)
+		for i in range(1, n):
+			prefix_sum_diffs[i] = prefix_sum_diffs[i - 1] + differences[i]
+			min_diff = min(prefix_sum_diffs[i], min_diff)
+			max_diff = max(prefix_sum_diffs[i], max_diff)
 
-        for i in range(lower, upper + 1):
-            if i + min_diff < lower or i + max_diff > upper:
-                continue
+		for i in range(lower, upper + 1):
+			if i + min_diff < lower or i + max_diff > upper:
+				continue
 
-            total_count += 1
+			total_count += 1
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(n)
-        return total_count
+		# Time Complexity: O(n)
+		# Space Complexity: O(n)
+		return total_count

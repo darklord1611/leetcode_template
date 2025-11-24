@@ -25,23 +25,23 @@ from typing import List
 
 
 class Solution:
-    def longestSubarray(self, nums: List[int]) -> int:
-        # bitwise AND only decrease the value, -> the value# will be maximum when we have the maximum number in the arrays
-        # just count the consecutive occurrences of the maximum number in the array
-        n = len(nums)
-        max_num = max(nums)
+	def longestSubarray(self, nums: List[int]) -> int:
+		# bitwise AND only decrease the value, -> the value# will be maximum when we have the maximum number in the arrays
+		# just count the consecutive occurrences of the maximum number in the array
+		n = len(nums)
+		max_num = max(nums)
 
-        cur_count = 0
-        max_count = 0
+		cur_count = 0
+		max_count = 0
 
-        for i in range(n):
-            if nums[i] == max_num:
-                cur_count += 1
-                max_count = max(max_count, cur_count)
-            else:
-                cur_count = 0
+		for i in range(n):
+			if nums[i] == max_num:
+				cur_count += 1
+				max_count = max(max_count, cur_count)
+			else:
+				cur_count = 0
 
-        # Time Complexity: O(n) -> single pass through the array
-        # Space Complexity: O(1) -> no extra space used
+		# Time Complexity: O(n) -> single pass through the array
+		# Space Complexity: O(1) -> no extra space used
 
-        return max_count
+		return max_count

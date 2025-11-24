@@ -7,22 +7,22 @@
 
 
 class Solution:
-    def numSub(self, s: str) -> int:
-        # record the length of each segement with continuous 1s
+	def numSub(self, s: str) -> int:
+		# record the length of each segement with continuous 1s
 
-        MOD = 10**9 + 7
-        ans = 0
-        cur_len = 0
-        for char in s:
-            if char == "1":
-                cur_len += 1
-            else:
-                ans += cur_len * (cur_len + 1) // 2 % MOD
-                cur_len = 0
+		MOD = 10**9 + 7
+		ans = 0
+		cur_len = 0
+		for char in s:
+			if char == "1":
+				cur_len += 1
+			else:
+				ans += cur_len * (cur_len + 1) // 2 % MOD
+				cur_len = 0
 
-        # account for the string ends with 1s
-        ans += (cur_len * (cur_len + 1) // 2) % MOD
+		# account for the string ends with 1s
+		ans += (cur_len * (cur_len + 1) // 2) % MOD
 
-        # Time complexity: O(n)
-        # Space complexity: O(1)
-        return ans
+		# Time complexity: O(n)
+		# Space complexity: O(1)
+		return ans

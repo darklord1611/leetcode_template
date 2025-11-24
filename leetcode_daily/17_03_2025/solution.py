@@ -19,22 +19,22 @@
 
 # Your solution starts here
 
-from typing import List
 from collections import defaultdict
+from typing import List
 
 
 class Solution:
-    def divideArray(self, nums: List[int]) -> bool:
-        n = len(nums)
-        freq = defaultdict(int)
+	def divideArray(self, nums: List[int]) -> bool:
+		n = len(nums)
+		freq = defaultdict(int)
 
-        for i in range(n):
-            freq[nums[i]] += 1
+		for i in range(n):
+			freq[nums[i]] += 1
 
-        for key in freq:
-            if freq[key] % 2 != 0:
-                return False
+		for key in freq:
+			if freq[key] % 2 != 0:
+				return False
 
-        # Time complexity: O(n)
-        # Space complexity: O(n)
-        return True
+		# Time complexity: O(n)
+		# Space complexity: O(n)
+		return True

@@ -24,26 +24,26 @@ from typing import List
 
 
 class Solution:
-    def subsetXORSum(self, nums: List[int]) -> int:
-        subsets_xor_sums = []
-        n = len(nums)
-        cur_subsets = []
+	def subsetXORSum(self, nums: List[int]) -> int:
+		subsets_xor_sums = []
+		n = len(nums)
+		cur_subsets = []
 
-        def dfs(cur_index):
-            if cur_index >= n:
-                cur_xor = cur_subsets[0] if len(cur_subsets) > 0 else 0
-                for i in range(1, len(cur_subsets)):
-                    cur_xor = cur_xor ^ cur_subsets[i]
-                subsets_xor_sums.append(cur_xor)
-                return
+		def dfs(cur_index):
+			if cur_index >= n:
+				cur_xor = cur_subsets[0] if len(cur_subsets) > 0 else 0
+				for i in range(1, len(cur_subsets)):
+					cur_xor = cur_xor ^ cur_subsets[i]
+				subsets_xor_sums.append(cur_xor)
+				return
 
-            # include the current element
-            cur_subsets.append(nums[cur_index])
-            dfs(cur_index + 1)
+			# include the current element
+			cur_subsets.append(nums[cur_index])
+			dfs(cur_index + 1)
 
-            # exclude the current element
-            cur_subsets.pop()
-            dfs(cur_index + 1)
+			# exclude the current element
+			cur_subsets.pop()
+			dfs(cur_index + 1)
 
-        dfs(0)
-        return sum(subsets_xor_sums)
+		dfs(0)
+		return sum(subsets_xor_sums)

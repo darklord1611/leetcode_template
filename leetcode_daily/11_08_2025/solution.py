@@ -17,41 +17,41 @@ from typing import List
 
 
 class Solution:
-    def productQueries(self, n: int, queries: List[List[int]]) -> List[int]:
-        # represent the number in binary -> ex: 1011010 -> powers array would consist of 1-value indices
-        # now we have range queries -> utilize prefix arrays
+	def productQueries(self, n: int, queries: List[List[int]]) -> List[int]:
+		# represent the number in binary -> ex: 1011010 -> powers array would consist of 1-value indices
+		# now we have range queries -> utilize prefix arrays
 
-        powers = []
-        cur_power = 1
-        temp = n
-        MOD = 10**9 + 7
-        ans = []
+		powers = []
+		cur_power = 1
+		temp = n
+		MOD = 10**9 + 7
+		ans = []
 
-        while temp != 0:
-            if temp % 2 != 0:
-                powers.append(cur_power)
+		while temp != 0:
+			if temp % 2 != 0:
+				powers.append(cur_power)
 
-            cur_power = cur_power << 1
-            temp = temp >> 1
+			cur_power = cur_power << 1
+			temp = temp >> 1
 
-        m = len(powers)
+		m = len(powers)
 
-        # a query [a, b], we must multiply all powers[i] with a <= i <= b
-        # [a, b] = [0, b + 1] - [0, a - 1] -> use prefix multiply
+		# a query [a, b], we must multiply all powers[i] with a <= i <= b
+		# [a, b] = [0, b + 1] - [0, a - 1] -> use prefix multiply
 
-        prefix_mul = [0 for _ in range(m)]
-        prefix_mul[0] = powers[0]
+		prefix_mul = [0 for _ in range(m)]
+		prefix_mul[0] = powers[0]
 
-        for j in range(1, m):
-            prefix_mul[j] = prefix_mul[j - 1] * powers[j]
+		for j in range(1, m):
+			prefix_mul[j] = prefix_mul[j - 1] * powers[j]
 
-        for query in queries:
-            left, right = query
-            if left == 0:
-                ans.append(prefix_mul[right] % MOD)
-            else:
-                ans.append((prefix_mul[right] // prefix_mul[left - 1]) % MOD)
+		for query in queries:
+			left, right = query
+			if left == 0:
+				ans.append(prefix_mul[right] % MOD)
+			else:
+				ans.append((prefix_mul[right] // prefix_mul[left - 1]) % MOD)
 
-        # Time Complexity: O(m + q), where m is the number of powers and q is the number of queries
-        # Space Complexity: O(m + q), where m is the number of powers and q is the number of queries
-        return ans
+		# Time Complexity: O(m + q), where m is the number of powers and q is the number of queries
+		# Space Complexity: O(m + q), where m is the number of powers and q is the number of queries
+		return ans

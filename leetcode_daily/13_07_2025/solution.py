@@ -17,23 +17,23 @@ from typing import List
 
 
 class Solution:
-    def matchPlayersAndTrainers(self, players: List[int], trainers: List[int]) -> int:
-        # greedy -> sort both the players and trainers ascendingly, then just pick accordingly
-        m = len(players)
-        n = len(trainers)
+	def matchPlayersAndTrainers(self, players: List[int], trainers: List[int]) -> int:
+		# greedy -> sort both the players and trainers ascendingly, then just pick accordingly
+		m = len(players)
+		n = len(trainers)
 
-        players.sort()
-        trainers.sort()
+		players.sort()
+		trainers.sort()
 
-        i = 0
-        j = 0
-        matches = 0
-        while i < m and j < n:
-            if players[i] <= trainers[j]:
-                matches += 1
-                i += 1
-                j += 1
-            else:
-                j += 1
+		i = 0
+		j = 0
+		matches = 0
+		while i < m and j < n:
+			if players[i] <= trainers[j]:
+				matches += 1
+				i += 1
+				j += 1
+			else:
+				j += 1
 
-        return matches
+		return matches

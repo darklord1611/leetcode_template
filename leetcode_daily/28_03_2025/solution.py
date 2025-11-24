@@ -20,72 +20,64 @@
 
 
 # Your solution starts here
-from typing import List
 from collections import defaultdict, deque
+from typing import List
 
 
 class Solution:
-    def maxPoints(self, grid: List[List[int]], queries: List[int]) -> List[int]:
-        # process lower values queries first -> reuse the results? -> dp
-        # for each queries, store the cells that are explored but not valid -> use those cells as starting points for subsequent queries
+	def maxPoints(self, grid: List[List[int]], queries: List[int]) -> List[int]:
+		# process lower values queries first -> reuse the results? -> dp
+		# for each queries, store the cells that are explored but not valid -> use those cells as starting points for subsequent queries
 
-        m = len(grid)
-        n = len(grid[0])
-        k = len(queries)
-        res = [0 for _ in range(k)]
-        queries_with_index = [(query, i) for i, query in enumerate(queries)]
-        queries_with_index.sort()
-        sorted_queries_with_index = [(0, 0)]
-        sorted_queries_with_index.extend(queries_with_index)
-        cache_points = defaultdict(
-            int
-        )  # caching the results for identical query values
+		m = len(grid)
+		n = len(grid[0])
+		k = len(queries)
+		res = [0 for _ in range(k)]
+		queries_with_index = [(query, i) for i, query in enumerate(queries)]
+		queries_with_index.sort()
+		sorted_queries_with_index = [(0, 0)]
+		sorted_queries_with_index.extend(queries_with_index)
+		cache_points = defaultdict(int)  # caching the results for identical query values
 
-        visited = [[False for _ in range(n)] for i in range(m)]
-        dp = [0 for _ in range(k + 1)]
-        starting_cells = deque([(0, 0)])
+		visited = [[False for _ in range(n)] for i in range(m)]
+		dp = [0 for _ in range(k + 1)]
+		starting_cells = deque([(0, 0)])
 
-        def search(row, col, query, visited):
-            if row < 0 or row >= m:
-                return 0
+		def search(row, col, query, visited):
+			if row < 0 or row >= m:
+				return 0
 
-            if col < 0 or col >= n:
-                return 0
+			if col < 0 or col >= n:
+				return 0
 
-            if visited[row][col]:
-                return 0
+			if visited[row][col]:
+				return 0
 
-            visited[row][col] = True
+			visited[row][col] = True
 
-            if grid[row][col] < query:
-                return (
-                    1
-                    + search(row + 1, col, query, visited)
-                    + search(row - 1, col, query, visited)
-                    + search(row, col - 1, query, visited)
-                    + search(row, col + 1, query, visited)
-                )
-            else:
-                starting_cells.append((row, col))
-                return 0
+			if grid[row][col] < query:
+				return 1 + search(row + 1, col, query, visited) + search(row - 1, col, query, visited) + search(row, col - 1, query, visited) + search(row, col + 1, query, visited)
+			else:
+				starting_cells.append((row, col))
+				return 0
 
-        for i in range(1, k + 1):
-            val, index = sorted_queries_with_index[i]
+		for i in range(1, k + 1):
+			val, index = sorted_queries_with_index[i]
 
-            if cache_points[val] != 0:
-                dp[i] = cache_points[val]
-                res[index] = cache_points[val]
-                continue
+			if cache_points[val] != 0:
+				dp[i] = cache_points[val]
+				res[index] = cache_points[val]
+				continue
 
-            acc_points = dp[i - 1]
-            for _ in range(len(starting_cells)):
-                row, col = starting_cells.popleft()
-                visited[row][col] = False
-                acc_points += search(row, col, val, visited)
-            dp[i] = acc_points
-            res[index] = acc_points
-            cache_points[val] = acc_points
+			acc_points = dp[i - 1]
+			for _ in range(len(starting_cells)):
+				row, col = starting_cells.popleft()
+				visited[row][col] = False
+				acc_points += search(row, col, val, visited)
+			dp[i] = acc_points
+			res[index] = acc_points
+			cache_points[val] = acc_points
 
-        # Time complexity: O(m*n*k)
-        # Space complexity: O(max(m*n, k))
-        return res
+		# Time complexity: O(m*n*k)
+		# Space complexity: O(max(m*n, k))
+		return res

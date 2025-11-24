@@ -15,15 +15,15 @@
 
 
 class Solution:
-    def countOperations(self, num1: int, num2: int) -> int:
-        # (8, 6) -> (2, 6) -> (2, 4) -> (2, 2) -> done
-        count = 0
-        while num1 != 0 and num2 != 0:
-            if num1 >= num2:
-                num1 -= num2
-            else:
-                num2 -= num1
+	def countOperations(self, num1: int, num2: int) -> int:
+		# (8, 6) -> (2, 6) -> (2, 4) -> (2, 2) -> done
+		count = 0
+		while num1 != 0 and num2 != 0:
+			if num1 >= num2:
+				num1 -= num2
+			else:
+				num2 -= num1
 
-            count += 1
+			count += 1
 
-        return count
+		return count

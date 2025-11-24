@@ -21,31 +21,31 @@
 
 
 class Solution:
-    def lengthAfterTransformations(self, s: str, t: int) -> int:
-        # just simulate the whole process, think about recursive formula, how can we update the frequencies of each index?
-        # are there any special characters that would require special counting?
+	def lengthAfterTransformations(self, s: str, t: int) -> int:
+		# just simulate the whole process, think about recursive formula, how can we update the frequencies of each index?
+		# are there any special characters that would require special counting?
 
-        # for any characters, the count after a transformation would be the count of the previous character, count(d) after transform = count(c) before transform
-        # what about b? a? z?
+		# for any characters, the count after a transformation would be the count of the previous character, count(d) after transform = count(c) before transform
+		# what about b? a? z?
 
-        mod = 10**9 + 7
+		mod = 10**9 + 7
 
-        count = [0] * 26
+		count = [0] * 26
 
-        for ch in s:
-            count[ord(ch) - ord("a")] += 1
+		for ch in s:
+			count[ord(ch) - ord("a")] += 1
 
-        for _ in range(t):
-            next_count = [0] * 26
+		for _ in range(t):
+			next_count = [0] * 26
 
-            next_count[0] = count[25]
-            next_count[1] = (count[25] + count[0]) % mod
+			next_count[0] = count[25]
+			next_count[1] = (count[25] + count[0]) % mod
 
-            for i in range(2, 26):
-                next_count[i] = count[i - 1]
+			for i in range(2, 26):
+				next_count[i] = count[i - 1]
 
-            count = next_count
+			count = next_count
 
-        ans = sum(count) % mod
+		ans = sum(count) % mod
 
-        return ans
+		return ans

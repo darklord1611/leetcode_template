@@ -17,29 +17,25 @@ from typing import List
 
 
 class Solution:
-    def maxIncreasingSubarrays(self, nums: List[int]) -> int:
-        # so we maintain a sliding window of size 2 * k -> we check for valid subarrays when the indices are even
+	def maxIncreasingSubarrays(self, nums: List[int]) -> int:
+		# so we maintain a sliding window of size 2 * k -> we check for valid subarrays when the indices are even
 
-        # even simpler, so we either get our subarrays from one giant increasing array, or from 2 different consecutive increasing subarrays
-        # so we can effectively record the current length of increasing subarray -> then compare two options, take from the current or from the 2 last subarrays
+		# even simpler, so we either get our subarrays from one giant increasing array, or from 2 different consecutive increasing subarrays
+		# so we can effectively record the current length of increasing subarray -> then compare two options, take from the current or from the 2 last subarrays
 
-        n = len(nums)
-        prev_count = 0  # length of the previous increasing subarray
-        cur_count = 1  # length of the current increasing subarray
-        max_k = 0
+		n = len(nums)
+		prev_count = 0  # length of the previous increasing subarray
+		cur_count = 1  # length of the current increasing subarray
+		max_k = 0
 
-        nums.append(
-            -(10**10)
-        )  # append a small number to avoid extra checks at the end of the array
+		nums.append(-(10**10))  # append a small number to avoid extra checks at the end of the array
 
-        for i in range(n):
-            if nums[i] < nums[i + 1]:
-                cur_count += 1
-            else:
-                max_k = max(
-                    max_k, cur_count // 2, min(cur_count, prev_count)
-                )  # consider 2 options
-                prev_count = cur_count
-                cur_count = 1
+		for i in range(n):
+			if nums[i] < nums[i + 1]:
+				cur_count += 1
+			else:
+				max_k = max(max_k, cur_count // 2, min(cur_count, prev_count))  # consider 2 options
+				prev_count = cur_count
+				cur_count = 1
 
-        return max_k
+		return max_k

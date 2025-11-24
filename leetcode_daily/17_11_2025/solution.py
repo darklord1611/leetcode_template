@@ -8,21 +8,21 @@ from typing import List
 
 
 class Solution:
-    def kLengthApart(self, nums: List[int], k: int) -> bool:
-        # two pointers -> one for the previous instance of 1, the other for the current 1
+	def kLengthApart(self, nums: List[int], k: int) -> bool:
+		# two pointers -> one for the previous instance of 1, the other for the current 1
 
-        prev = -1
-        cur = -1
-        n = len(nums)
-        for i in range(n):
-            if nums[i] == 1:
-                prev = cur
-                cur = i
+		prev = -1
+		cur = -1
+		n = len(nums)
+		for i in range(n):
+			if nums[i] == 1:
+				prev = cur
+				cur = i
 
-                if prev == -1:  # we haven't reach the second 1s yet
-                    continue
+				if prev == -1:  # we haven't reach the second 1s yet
+					continue
 
-                if cur - prev <= k:
-                    return False
+				if cur - prev <= k:
+					return False
 
-        return True
+		return True

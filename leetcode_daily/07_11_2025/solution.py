@@ -22,58 +22,58 @@ from typing import List
 
 
 class Solution:
-    def maxPower(self, stations: List[int], r: int, k: int) -> int:
-        # so first lets find out the maximum power station of each cities first
+	def maxPower(self, stations: List[int], r: int, k: int) -> int:
+		# so first lets find out the maximum power station of each cities first
 
-        # to do that we can use difference arrays
+		# to do that we can use difference arrays
 
-        n = len(stations)
-        diff = [0 for i in range(n + 1)]
+		n = len(stations)
+		diff = [0 for i in range(n + 1)]
 
-        for i in range(n):
-            left_bound = max(0, i - r)
-            right_bound = min(i + r + 1, n)
-            diff[left_bound] += stations[i]
-            diff[right_bound] -= stations[i]
+		for i in range(n):
+			left_bound = max(0, i - r)
+			right_bound = min(i + r + 1, n)
+			diff[left_bound] += stations[i]
+			diff[right_bound] -= stations[i]
 
-        # we got the initial powers, now think of the question
-        # we need to maximize the possible minimum powers(which is the min power that every cities would have if we build additional k station effectively, suppose this number is x
+		# we got the initial powers, now think of the question
+		# we need to maximize the possible minimum powers(which is the min power that every cities would have if we build additional k station effectively, suppose this number is x
 
-        # suppose the answer is x -> then we could also build minimum power of any smaller values -> the condition is monotonic if x is satisfied -> then all smaller values of range [min(initial_powers), x] also satisfied, all larger values would not satisfy
+		# suppose the answer is x -> then we could also build minimum power of any smaller values -> the condition is monotonic if x is satisfied -> then all smaller values of range [min(initial_powers), x] also satisfied, all larger values would not satisfy
 
-        # checking condition
-        def check(x):
-            powers = diff.copy()
-            total = 0
-            remaining = k
+		# checking condition
+		def check(x):
+			powers = diff.copy()
+			total = 0
+			remaining = k
 
-            for i in range(n):
-                total += powers[i]
-                if total < x:
-                    add = x - total
-                    if remaining < add:
-                        return False
+			for i in range(n):
+				total += powers[i]
+				if total < x:
+					add = x - total
+					if remaining < add:
+						return False
 
-                    remaining -= add
-                    end = min(n, i + 2 * r + 1)
-                    powers[end] -= add
-                    total += add
-            return True
+					remaining -= add
+					end = min(n, i + 2 * r + 1)
+					powers[end] -= add
+					total += add
+			return True
 
-        # binary search
-        low = min(stations)
-        high = sum(stations) + k
+		# binary search
+		low = min(stations)
+		high = sum(stations) + k
 
-        res = 0
+		res = 0
 
-        while low <= high:
-            mid = (low + high) // 2
+		while low <= high:
+			mid = (low + high) // 2
 
-            valid = check(mid)
-            if valid:
-                res = mid
-                low = mid + 1
-            else:
-                high = mid - 1
+			valid = check(mid)
+			if valid:
+				res = mid
+				low = mid + 1
+			else:
+				high = mid - 1
 
-        return res
+		return res

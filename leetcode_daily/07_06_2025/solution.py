@@ -22,23 +22,23 @@ import heapq
 
 
 class Solution:
-    def clearStars(self, s: str) -> str:
-        # whenever we encounter a star * -> we must delete a character on the left, the character should be the smallest since we need lexicographically smallest result str
-        # the characters after the last star are kept intact
-        # we prioritize smaller characters and if they equal, pick the largest one -> save the smaller indices for later stars if possible
-        n = len(s)
-        heap = []
-        res = ""
-        used_indices = set()
-        for i in range(n):
-            if s[i] != "*":
-                heapq.heappush(heap, (s[i], -i))
-            else:
-                cur_char, index = heapq.heappop(heap)
-                used_indices.add(-index)
+	def clearStars(self, s: str) -> str:
+		# whenever we encounter a star * -> we must delete a character on the left, the character should be the smallest since we need lexicographically smallest result str
+		# the characters after the last star are kept intact
+		# we prioritize smaller characters and if they equal, pick the largest one -> save the smaller indices for later stars if possible
+		n = len(s)
+		heap = []
+		res = ""
+		used_indices = set()
+		for i in range(n):
+			if s[i] != "*":
+				heapq.heappush(heap, (s[i], -i))
+			else:
+				cur_char, index = heapq.heappop(heap)
+				used_indices.add(-index)
 
-        for i in range(n):
-            if i not in used_indices and s[i] != "*":
-                res += s[i]
+		for i in range(n):
+			if i not in used_indices and s[i] != "*":
+				res += s[i]
 
-        return res
+		return res

@@ -23,28 +23,28 @@ from typing import List
 
 
 class Solution:
-    def minOperations(self, nums: List[int]) -> int:
-        # flipping from left to right -> making sure that the preceding indexes are already satisfied
-        # first bit of every flip should be a zero aka [0, 1, 1] -> ok, [1, 0, 1] -> flipping now is not ok
-        # only flip leftmost bit if needed -> why? need to prove the correctness
-        n = len(nums)
-        left = 0
-        window_size = 3
-        flip_count = 0
-        for right in range(n):
-            if right - left + 1 == window_size:
-                if nums[left] == 0:
-                    flip_count += 1
-                    for i in range(window_size):
-                        nums[left + i] = 1 - nums[left + i]
+	def minOperations(self, nums: List[int]) -> int:
+		# flipping from left to right -> making sure that the preceding indexes are already satisfied
+		# first bit of every flip should be a zero aka [0, 1, 1] -> ok, [1, 0, 1] -> flipping now is not ok
+		# only flip leftmost bit if needed -> why? need to prove the correctness
+		n = len(nums)
+		left = 0
+		window_size = 3
+		flip_count = 0
+		for right in range(n):
+			if right - left + 1 == window_size:
+				if nums[left] == 0:
+					flip_count += 1
+					for i in range(window_size):
+						nums[left + i] = 1 - nums[left + i]
 
-                left += 1
+				left += 1
 
-        # check if whether still exists some zeroes in the array -> impossible
-        for i in range(n - 1, -1, -1):
-            if nums[i] == 0:
-                return -1
+		# check if whether still exists some zeroes in the array -> impossible
+		for i in range(n - 1, -1, -1):
+			if nums[i] == 0:
+				return -1
 
-        # Time complexity: O(n)
-        # Space complexity: O(1)
-        return flip_count
+		# Time complexity: O(n)
+		# Space complexity: O(1)
+		return flip_count

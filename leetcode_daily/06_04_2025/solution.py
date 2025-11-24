@@ -18,52 +18,49 @@
 # Your solution starts here
 from typing import List
 
-
 # TOP DOWN DP
 
 
 class Solution:
-    def largestDivisibleSubset(self, nums: List[int]) -> List[int]:
-        # given 4 numbers: a b c d -> how to check if valid?
-        # check if a % b == 0 or b % a == 0 -> simplify: max(a, b) % min(a, b) == 0 -> sort first
-        # what happen when we add another sorted number to the result? check with all numbers? -> only check with the largest number
-        # we can either include the number if satisfied or skip -> overlapped problems -> DP
-        nums.sort()
-        n = len(nums)
-        cache = {}
+	def largestDivisibleSubset(self, nums: List[int]) -> List[int]:
+		# given 4 numbers: a b c d -> how to check if valid?
+		# check if a % b == 0 or b % a == 0 -> simplify: max(a, b) % min(a, b) == 0 -> sort first
+		# what happen when we add another sorted number to the result? check with all numbers? -> only check with the largest number
+		# we can either include the number if satisfied or skip -> overlapped problems -> DP
+		nums.sort()
+		n = len(nums)
+		cache = {}
 
-        def dfs(index) -> List[int]:
-            if index >= n:
-                return []
+		def dfs(index) -> List[int]:
+			if index >= n:
+				return []
 
-            if index in cache:
-                return cache[index]
+			if index in cache:
+				return cache[index]
 
-            cur_subset = [nums[index]]
+			cur_subset = [nums[index]]
 
-            tmp_subset = []
+			tmp_subset = []
 
-            for i in range(index + 1, n):
-                if nums[i] % nums[index] == 0:
-                    tmp_subset = [nums[index]] + dfs(
-                        i
-                    )  # continue exploring the ith index
-                    if len(tmp_subset) > len(cur_subset):
-                        cur_subset = tmp_subset
+			for i in range(index + 1, n):
+				if nums[i] % nums[index] == 0:
+					tmp_subset = [nums[index]] + dfs(i)  # continue exploring the ith index
+					if len(tmp_subset) > len(cur_subset):
+						cur_subset = tmp_subset
 
-            cache[index] = cur_subset
-            return cur_subset
+			cache[index] = cur_subset
+			return cur_subset
 
-        res = []
-        for i in range(n):  # check all subsets starting at any possible indexes
-            tmp_subset = dfs(i)
-            if len(tmp_subset) > len(res):
-                res = tmp_subset
+		res = []
+		for i in range(n):  # check all subsets starting at any possible indexes
+			tmp_subset = dfs(i)
+			if len(tmp_subset) > len(res):
+				res = tmp_subset
 
-        # Time Complexity: O(n^2)
-        # Space Complexity: O(n)
+		# Time Complexity: O(n^2)
+		# Space Complexity: O(n)
 
-        return res
+		return res
 
 
 # BOTTOM UP DP

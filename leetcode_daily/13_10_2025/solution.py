@@ -19,18 +19,18 @@ from typing import List
 
 
 class Solution:
-    def removeAnagrams(self, words: List[str]) -> List[str]:
-        # anagrams when sorted would result in the same string
-        # loop through
+	def removeAnagrams(self, words: List[str]) -> List[str]:
+		# anagrams when sorted would result in the same string
+		# loop through
 
-        n = len(words)
-        mask = [1 for _ in range(n)]
-        prev_idx = 0
+		n = len(words)
+		mask = [1 for _ in range(n)]
+		prev_idx = 0
 
-        for i in range(1, n):
-            if "".join(sorted(words[i])) == "".join(sorted(words[prev_idx])):
-                mask[i] = 0
-            else:
-                prev_idx = i
+		for i in range(1, n):
+			if "".join(sorted(words[i])) == "".join(sorted(words[prev_idx])):
+				mask[i] = 0
+			else:
+				prev_idx = i
 
-        return [words[i] for i in range(n) if mask[i] == 1]
+		return [words[i] for i in range(n) if mask[i] == 1]

@@ -23,22 +23,22 @@ from collections import Counter
 
 
 class Solution:
-    def maxDifference(self, s: str) -> int:
-        min_odd_freq = float("inf")
-        min_even_freq = float("inf")
-        max_odd_freq = -1
-        max_even_freq = -1
+	def maxDifference(self, s: str) -> int:
+		min_odd_freq = float("inf")
+		min_even_freq = float("inf")
+		max_odd_freq = -1
+		max_even_freq = -1
 
-        count = Counter(s)
+		count = Counter(s)
 
-        for key in count:
-            if count[key] % 2 == 0:
-                min_even_freq = min(min_even_freq, count[key])
-                max_even_freq = max(max_even_freq, count[key])
-            else:
-                min_odd_freq = min(min_odd_freq, count[key])
-                max_odd_freq = max(max_odd_freq, count[key])
+		for key in count:
+			if count[key] % 2 == 0:
+				min_even_freq = min(min_even_freq, count[key])
+				max_even_freq = max(max_even_freq, count[key])
+			else:
+				min_odd_freq = min(min_odd_freq, count[key])
+				max_odd_freq = max(max_odd_freq, count[key])
 
-        # Time complexity: O(n), where n is the length of the string s
-        # Space complexity: O(26), for the Counter dictionary
-        return max(max_odd_freq - min_even_freq, min_odd_freq - max_even_freq)
+		# Time complexity: O(n), where n is the length of the string s
+		# Space complexity: O(26), for the Counter dictionary
+		return max(max_odd_freq - min_even_freq, min_odd_freq - max_even_freq)

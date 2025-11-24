@@ -21,12 +21,12 @@
 
 
 class Solution:
-    def differenceOfSums(self, n: int, m: int) -> int:
-        # num1 + num2 = n * (n + 1) // 2
+	def differenceOfSums(self, n: int, m: int) -> int:
+		# num1 + num2 = n * (n + 1) // 2
 
-        div_sum = 0
-        for i in range(1, n + 1):
-            if i % m == 0:
-                div_sum += i
+		div_sum = 0
+		for i in range(1, n + 1):
+			if i % m == 0:
+				div_sum += i
 
-        return n * (n + 1) // 2 - 2 * div_sum
+		return n * (n + 1) // 2 - 2 * div_sum

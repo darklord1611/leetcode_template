@@ -17,39 +17,37 @@ from typing import List
 
 
 class Solution:
-    def minOperations(self, nums: List[int]) -> int:
-        # if the overall gcd is > 1 -> invalid
+	def minOperations(self, nums: List[int]) -> int:
+		# if the overall gcd is > 1 -> invalid
 
-        # if there exist 1 in the array -> then the min ops would be length - total count of 1s
+		# if there exist 1 in the array -> then the min ops would be length - total count of 1s
 
-        # else we need to find the minimum length of a subarray with gcd = 1 -> then we need to perform operations on that subarray -> then on the other remaining elements
-        n = len(nums)
-        cur_gcd = 0
-        one_count = 0
-        for i in range(n):
-            if nums[i] == 1:
-                one_count += 1
+		# else we need to find the minimum length of a subarray with gcd = 1 -> then we need to perform operations on that subarray -> then on the other remaining elements
+		n = len(nums)
+		cur_gcd = 0
+		one_count = 0
+		for i in range(n):
+			if nums[i] == 1:
+				one_count += 1
 
-            cur_gcd = math.gcd(cur_gcd, nums[i])
+			cur_gcd = math.gcd(cur_gcd, nums[i])
 
-        if one_count > 0:
-            return n - one_count
+		if one_count > 0:
+			return n - one_count
 
-        if cur_gcd > 1:
-            return -1
+		if cur_gcd > 1:
+			return -1
 
-        min_len = n
+		min_len = n
 
-        for i in range(n):
-            cur_gcd = 0
-            for j in range(i, n):
-                cur_gcd = math.gcd(cur_gcd, nums[j])
-                if cur_gcd == 1:
-                    min_len = min(min_len, j - i + 1)
-                    break
+		for i in range(n):
+			cur_gcd = 0
+			for j in range(i, n):
+				cur_gcd = math.gcd(cur_gcd, nums[j])
+				if cur_gcd == 1:
+					min_len = min(min_len, j - i + 1)
+					break
 
-        # Time complexity: O(n^2 * logn)
-        # Space complexity: O(1)
-        return (
-            (min_len - 1) + (n - 1)
-        )  # first part to obtain a 1 from the min length subarray with gcd == 1, then we transform the rest of the array to 1s
+		# Time complexity: O(n^2 * logn)
+		# Space complexity: O(1)
+		return (min_len - 1) + (n - 1)  # first part to obtain a 1 from the min length subarray with gcd == 1, then we transform the rest of the array to 1s

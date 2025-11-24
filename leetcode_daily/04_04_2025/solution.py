@@ -22,28 +22,28 @@ from typing import Optional
 
 # Definition for a binary tree node.
 class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
+	def __init__(self, val=0, left=None, right=None):
+		self.val = val
+		self.left = left
+		self.right = right
 
 
 class Solution:
-    def lcaDeepestLeaves(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
-        def dfs(cur_node) -> tuple:
-            if not cur_node:
-                return None, 0
+	def lcaDeepestLeaves(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+		def dfs(cur_node) -> tuple:
+			if not cur_node:
+				return None, 0
 
-            left_node, left_height = dfs(cur_node.left)
-            right_node, right_height = dfs(cur_node.right)
+			left_node, left_height = dfs(cur_node.left)
+			right_node, right_height = dfs(cur_node.right)
 
-            if left_height == right_height:  #
-                return cur_node, 1 + left_height
-            elif left_height < right_height:  #
-                return right_node, right_height + 1
-            else:  #
-                return left_node, left_height + 1
+			if left_height == right_height:  #
+				return cur_node, 1 + left_height
+			elif left_height < right_height:  #
+				return right_node, right_height + 1
+			else:  #
+				return left_node, left_height + 1
 
-        cur_node, height = dfs(root)
+		cur_node, height = dfs(root)
 
-        return cur_node
+		return cur_node

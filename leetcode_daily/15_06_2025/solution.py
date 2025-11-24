@@ -24,46 +24,46 @@
 
 
 class Solution:
-    def maxDiff(self, num: int) -> int:
-        # just pick the rightmost integer that not 9 -> transform to a 9 -> get the maximum number
-        # just pick the rightmost integer that not 1 -> transform to a 1 -> get the minimum number
+	def maxDiff(self, num: int) -> int:
+		# just pick the rightmost integer that not 9 -> transform to a 9 -> get the maximum number
+		# just pick the rightmost integer that not 1 -> transform to a 1 -> get the minimum number
 
-        digit_str = str(num)
-        n = len(digit_str)
-        max_digit_char_to_trans = ""
-        min_digit_char_to_trans = ""
-        max_num = []
-        min_num = []
+		digit_str = str(num)
+		n = len(digit_str)
+		max_digit_char_to_trans = ""
+		min_digit_char_to_trans = ""
+		max_num = []
+		min_num = []
 
-        # edge cases when the first digit is equal to 1
-        nums_to_exclude = ["0", "1"] if digit_str[0] == "1" else ["0"]
+		# edge cases when the first digit is equal to 1
+		nums_to_exclude = ["0", "1"] if digit_str[0] == "1" else ["0"]
 
-        for i in range(n):
-            if max_digit_char_to_trans != "" and min_digit_char_to_trans != "":
-                break
+		for i in range(n):
+			if max_digit_char_to_trans != "" and min_digit_char_to_trans != "":
+				break
 
-            # find the rightmost digit that not equal to 9 for max transform
-            if digit_str[i] != "9" and max_digit_char_to_trans == "":
-                max_digit_char_to_trans = digit_str[i]
+			# find the rightmost digit that not equal to 9 for max transform
+			if digit_str[i] != "9" and max_digit_char_to_trans == "":
+				max_digit_char_to_trans = digit_str[i]
 
-            # find the rightmost digit that not equal to 1 for min transform
-            if digit_str[i] not in nums_to_exclude and min_digit_char_to_trans == "":
-                min_digit_char_to_trans = digit_str[i]
+			# find the rightmost digit that not equal to 1 for min transform
+			if digit_str[i] not in nums_to_exclude and min_digit_char_to_trans == "":
+				min_digit_char_to_trans = digit_str[i]
 
-        min_digit = "1" if (min_digit_char_to_trans == digit_str[0]) else "0"
+		min_digit = "1" if (min_digit_char_to_trans == digit_str[0]) else "0"
 
-        for i in range(n):
-            temp = digit_str[i]
-            if digit_str[i] == max_digit_char_to_trans:
-                temp = "9"
-            max_num.append(temp)
+		for i in range(n):
+			temp = digit_str[i]
+			if digit_str[i] == max_digit_char_to_trans:
+				temp = "9"
+			max_num.append(temp)
 
-            temp = digit_str[i]
-            if digit_str[i] == min_digit_char_to_trans:
-                temp = min_digit
-            min_num.append(temp)
+			temp = digit_str[i]
+			if digit_str[i] == min_digit_char_to_trans:
+				temp = min_digit
+			min_num.append(temp)
 
-        num1 = int("".join(max_num))
-        num2 = int("".join(min_num))
+		num1 = int("".join(max_num))
+		num2 = int("".join(min_num))
 
-        return num1 - num2
+		return num1 - num2

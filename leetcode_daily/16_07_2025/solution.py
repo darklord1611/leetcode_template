@@ -22,31 +22,29 @@ from typing import List
 
 
 class Solution:
-    def maximumLength(self, nums: List[int]) -> int:
-        # same parity -> all even, all odd or alternating even-odd, odd-even
-        # so we just count the length of 4 possible ordering and take the max
+	def maximumLength(self, nums: List[int]) -> int:
+		# same parity -> all even, all odd or alternating even-odd, odd-even
+		# so we just count the length of 4 possible ordering and take the max
 
-        n = len(nums)
-        next_parity_even_odd = 0
-        next_parity_odd_even = 1
-        cur_lens = [
-            0 for _ in range(4)
-        ]  # [all-even, all-odd, alt-even-odd, alt-odd-even]
+		n = len(nums)
+		next_parity_even_odd = 0
+		next_parity_odd_even = 1
+		cur_lens = [0 for _ in range(4)]  # [all-even, all-odd, alt-even-odd, alt-odd-even]
 
-        for i in range(n):
-            if nums[i] % 2 == 0:
-                cur_lens[0] += 1
-            else:
-                cur_lens[1] += 1
+		for i in range(n):
+			if nums[i] % 2 == 0:
+				cur_lens[0] += 1
+			else:
+				cur_lens[1] += 1
 
-            if nums[i] % 2 == next_parity_even_odd:
-                cur_lens[2] += 1
-                next_parity_even_odd = 1 - next_parity_even_odd
+			if nums[i] % 2 == next_parity_even_odd:
+				cur_lens[2] += 1
+				next_parity_even_odd = 1 - next_parity_even_odd
 
-            if nums[i] % 2 == next_parity_odd_even:
-                cur_lens[3] += 1
-                next_parity_odd_even = 1 - next_parity_odd_even
+			if nums[i] % 2 == next_parity_odd_even:
+				cur_lens[3] += 1
+				next_parity_odd_even = 1 - next_parity_odd_even
 
-        # Time complexity: O(n)
-        # Space complexity: O(1)
-        return max(cur_lens)
+		# Time complexity: O(n)
+		# Space complexity: O(1)
+		return max(cur_lens)

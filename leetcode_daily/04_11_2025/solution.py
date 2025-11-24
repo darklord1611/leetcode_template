@@ -20,26 +20,24 @@ from typing import List
 
 
 class Solution_1:
-    def findXSum(self, nums: List[int], k: int, x: int) -> List[int]:
-        ans = []
-        n = len(nums)
-        for i in range(n - k + 1):
-            cur_ans = 0
-            freq = {}
-            for j in range(i, i + k):
-                freq[nums[j]] = freq.get(nums[j], 0) + 1
+	def findXSum(self, nums: List[int], k: int, x: int) -> List[int]:
+		ans = []
+		n = len(nums)
+		for i in range(n - k + 1):
+			cur_ans = 0
+			freq = {}
+			for j in range(i, i + k):
+				freq[nums[j]] = freq.get(nums[j], 0) + 1
 
-            sorted_freq = sorted(
-                freq.items(), key=lambda x: (x[1], x[0]), reverse=True
-            )[:x]  # sort by freq and then by value
+			sorted_freq = sorted(freq.items(), key=lambda x: (x[1], x[0]), reverse=True)[:x]  # sort by freq and then by value
 
-            for val, key in sorted_freq:  # only take x element
-                cur_ans += key * val
+			for val, key in sorted_freq:  # only take x element
+				cur_ans += key * val
 
-            ans.append(cur_ans)
+			ans.append(cur_ans)
 
-        # Time complexity: O(n * (k + klogk))
-        # Space complexity: O(k)
+		# Time complexity: O(n * (k + klogk))
+		# Space complexity: O(k)
 
-        # there should be another more optimal approach using sliding window
-        return ans
+		# there should be another more optimal approach using sliding window
+		return ans

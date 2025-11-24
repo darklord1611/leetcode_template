@@ -23,34 +23,34 @@
 
 
 class Solution:
-    def minMaxDifference(self, num: int) -> int:
-        # remap the rightmost digit that not equal 9, for example: 8679 -> remap 8 -> 9
-        # remap the rightmost digit to 0
+	def minMaxDifference(self, num: int) -> int:
+		# remap the rightmost digit that not equal 9, for example: 8679 -> remap 8 -> 9
+		# remap the rightmost digit to 0
 
-        digit_str = str(num)
-        n = len(digit_str)
-        max_digit_char_to_trans = ""
-        min_digit_char_to_trans = digit_str[0]
-        max_num = []
-        min_num = []
+		digit_str = str(num)
+		n = len(digit_str)
+		max_digit_char_to_trans = ""
+		min_digit_char_to_trans = digit_str[0]
+		max_num = []
+		min_num = []
 
-        for i in range(n):
-            if digit_str[i] != "9":
-                max_digit_char_to_trans = digit_str[i]
-                break
+		for i in range(n):
+			if digit_str[i] != "9":
+				max_digit_char_to_trans = digit_str[i]
+				break
 
-        for i in range(n):
-            temp = digit_str[i]
-            if digit_str[i] == max_digit_char_to_trans:
-                temp = "9"
-            max_num.append(temp)
+		for i in range(n):
+			temp = digit_str[i]
+			if digit_str[i] == max_digit_char_to_trans:
+				temp = "9"
+			max_num.append(temp)
 
-            temp = digit_str[i]
-            if digit_str[i] == min_digit_char_to_trans:
-                temp = "0"
-            min_num.append(temp)
+			temp = digit_str[i]
+			if digit_str[i] == min_digit_char_to_trans:
+				temp = "0"
+			min_num.append(temp)
 
-        num1 = int("".join(max_num))
-        num2 = int("".join(min_num))
+		num1 = int("".join(max_num))
+		num2 = int("".join(min_num))
 
-        return num1 - num2
+		return num1 - num2

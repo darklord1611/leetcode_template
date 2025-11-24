@@ -23,83 +23,81 @@
 
 
 # Your solution starts here
-from typing import List
 import heapq
+from typing import List
 
 
 class DSU:
-    def __init__(self, n):
-        self.parents = [i for i in range(n + 1)]  # 1 -> still operational
-        self.is_operational = [True for i in range(n + 1)]
-        self.groups = {}
+	def __init__(self, n):
+		self.parents = [i for i in range(n + 1)]  # 1 -> still operational
+		self.is_operational = [True for i in range(n + 1)]
+		self.groups = {}
 
-    def find(self, idx):
-        # find the operational station within the power grid
-        if self.parents[idx] == idx:  # still active
-            return idx
-        else:
-            self.parents[idx] = self.find(self.parents[idx])
-            return self.parents[idx]
+	def find(self, idx):
+		# find the operational station within the power grid
+		if self.parents[idx] == idx:  # still active
+			return idx
+		else:
+			self.parents[idx] = self.find(self.parents[idx])
+			return self.parents[idx]
 
-    def deactivate_station(self, idx):
-        self.is_operational[idx] = False
+	def deactivate_station(self, idx):
+		self.is_operational[idx] = False
 
-    def build(self, n):
-        for i in range(1, n + 1):
-            cur_root = self.find(i)
-            if cur_root not in self.groups.keys():
-                self.groups[cur_root] = [i]
-            else:
-                heapq.heappush(self.groups[cur_root], i)
+	def build(self, n):
+		for i in range(1, n + 1):
+			cur_root = self.find(i)
+			if cur_root not in self.groups.keys():
+				self.groups[cur_root] = [i]
+			else:
+				heapq.heappush(self.groups[cur_root], i)
 
-    def find_station(self, idx):
-        if self.is_operational[idx]:
-            return idx
+	def find_station(self, idx):
+		if self.is_operational[idx]:
+			return idx
 
-        root_idx = self.find(idx)
-        while len(self.groups[root_idx]) != 0:
-            cur_station_id = heapq.heappop(self.groups[root_idx])
-            if self.is_operational[cur_station_id]:
-                heapq.heappush(self.groups[root_idx], cur_station_id)
-                return cur_station_id
+		root_idx = self.find(idx)
+		while len(self.groups[root_idx]) != 0:
+			cur_station_id = heapq.heappop(self.groups[root_idx])
+			if self.is_operational[cur_station_id]:
+				heapq.heappush(self.groups[root_idx], cur_station_id)
+				return cur_station_id
 
-        return -1
+		return -1
 
-    def union(self, x, y):
-        root_x = self.find(x)
-        root_y = self.find(y)
+	def union(self, x, y):
+		root_x = self.find(x)
+		root_y = self.find(y)
 
-        if root_x != root_y:
-            self.parents[max(root_x, root_y)] = self.parents[min(root_x, root_y)]
+		if root_x != root_y:
+			self.parents[max(root_x, root_y)] = self.parents[min(root_x, root_y)]
 
-        return None
+		return None
 
 
 class Solution:
-    def processQueries(
-        self, c: int, connections: List[List[int]], queries: List[List[int]]
-    ) -> List[int]:
-        # disjoint set union
-        # each power station starts as an independent set -> then union
+	def processQueries(self, c: int, connections: List[List[int]], queries: List[List[int]]) -> List[int]:
+		# disjoint set union
+		# each power station starts as an independent set -> then union
 
-        dsu = DSU(c)
+		dsu = DSU(c)
 
-        n = len(connections)
-        m = len(queries)
-        ans = []
+		n = len(connections)
+		m = len(queries)
+		ans = []
 
-        for i in range(n):
-            dsu.union(connections[i][0], connections[i][1])
+		for i in range(n):
+			dsu.union(connections[i][0], connections[i][1])
 
-        dsu.build(c)  # build the min-heap of each connected components
+		dsu.build(c)  # build the min-heap of each connected components
 
-        for i in range(m):
-            query_type, station_id = queries[i]
-            if query_type == 2:
-                dsu.deactivate_station(station_id)
-            else:
-                cur_station = dsu.find_station(station_id)
+		for i in range(m):
+			query_type, station_id = queries[i]
+			if query_type == 2:
+				dsu.deactivate_station(station_id)
+			else:
+				cur_station = dsu.find_station(station_id)
 
-                ans.append(cur_station)
+				ans.append(cur_station)
 
-        return ans
+		return ans

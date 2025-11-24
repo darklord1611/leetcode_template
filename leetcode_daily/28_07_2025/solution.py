@@ -17,31 +17,31 @@ from typing import List
 
 
 class Solution:
-    def countMaxOrSubsets(self, nums: List[int]) -> int:
-        # maximum OR -> just OR every single elements then we would achieve the maximum
+	def countMaxOrSubsets(self, nums: List[int]) -> int:
+		# maximum OR -> just OR every single elements then we would achieve the maximum
 
-        # calc subsets, we either include a number or ignore it -> DFS
+		# calc subsets, we either include a number or ignore it -> DFS
 
-        n = len(nums)
-        max_or = nums[0]
-        for i in range(1, n):
-            max_or = max_or | nums[i]
+		n = len(nums)
+		max_or = nums[0]
+		for i in range(1, n):
+			max_or = max_or | nums[i]
 
-        def dfs(i, cur_or):
-            if i == n:
-                if cur_or == max_or:
-                    return 1
-                else:
-                    return 0
+		def dfs(i, cur_or):
+			if i == n:
+				if cur_or == max_or:
+					return 1
+				else:
+					return 0
 
-            next_or = cur_or | nums[i]
-            skip_count = dfs(i + 1, cur_or)
-            incl_count = dfs(i + 1, next_or)
+			next_or = cur_or | nums[i]
+			skip_count = dfs(i + 1, cur_or)
+			incl_count = dfs(i + 1, next_or)
 
-            return skip_count + incl_count
+			return skip_count + incl_count
 
-        res = dfs(0, 0)
+		res = dfs(0, 0)
 
-        # Time Complexity: O(2^n) -> all subsets
-        # Space Complexity: O(n) -> recursion stack
-        return res
+		# Time Complexity: O(2^n) -> all subsets
+		# Space Complexity: O(n) -> recursion stack
+		return res

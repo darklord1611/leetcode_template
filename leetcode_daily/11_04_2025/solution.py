@@ -14,31 +14,27 @@
 
 # Your solution starts here
 class Solution:
-    def countSymmetricIntegers(self, low: int, high: int) -> int:
-        # numbers between [low, high] = numbers between [0, high] - numbers between [0, low - 1]
+	def countSymmetricIntegers(self, low: int, high: int) -> int:
+		# numbers between [low, high] = numbers between [0, high] - numbers between [0, low - 1]
 
-        def count(num: int):
-            res = 0
-            for i in range(1, num + 1):
-                num_digits = 0
-                temp = i
-                prefix_sum = []
-                while temp != 0:
-                    num_digits += 1
-                    if len(prefix_sum) == 0:
-                        prefix_sum.append(temp % 10)
-                    else:
-                        prefix_sum.append(prefix_sum[len(prefix_sum) - 1] + temp % 10)
-                    temp = temp // 10
-                if (
-                    num_digits % 2 != 0
-                    or 2 * prefix_sum[(num_digits - 1) // 2]
-                    != prefix_sum[num_digits - 1]
-                ):
-                    continue
-                else:
-                    res += 1
+		def count(num: int):
+			res = 0
+			for i in range(1, num + 1):
+				num_digits = 0
+				temp = i
+				prefix_sum = []
+				while temp != 0:
+					num_digits += 1
+					if len(prefix_sum) == 0:
+						prefix_sum.append(temp % 10)
+					else:
+						prefix_sum.append(prefix_sum[len(prefix_sum) - 1] + temp % 10)
+					temp = temp // 10
+				if num_digits % 2 != 0 or 2 * prefix_sum[(num_digits - 1) // 2] != prefix_sum[num_digits - 1]:
+					continue
+				else:
+					res += 1
 
-            return res
+			return res
 
-        return count(high) - count(low - 1)
+		return count(high) - count(low - 1)

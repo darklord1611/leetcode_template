@@ -12,38 +12,34 @@ from typing import List
 
 
 class Solution:
-    def minOperations(self, nums: List[int]) -> int:
-        # so obviously we want to transform the most frequent non-zero elements first
-        # notice that if there is 0 in the subarray -> then we can't do the transform -> why?
+	def minOperations(self, nums: List[int]) -> int:
+		# so obviously we want to transform the most frequent non-zero elements first
+		# notice that if there is 0 in the subarray -> then we can't do the transform -> why?
 
-        # if we able to do the transformation to the non-zero elements -> then we should find the largest subarray to do all of them at once -> less operations
+		# if we able to do the transformation to the non-zero elements -> then we should find the largest subarray to do all of them at once -> less operations
 
-        # think about what happened to other non-zero elements after we transformed the first one? How does 0s affects them?
+		# think about what happened to other non-zero elements after we transformed the first one? How does 0s affects them?
 
-        # example: 3 4 2 1 2 1 4 1
+		# example: 3 4 2 1 2 1 4 1
 
-        # think of counting the number of segments of the same non-zero elements instead (monotonic stack)
-        # 1 1 1 -> is a valid segment where we could apply 1 ops
-        # 1 0 1 -> this is invalid and we have to break down into two smaller segments -> 2 ops
+		# think of counting the number of segments of the same non-zero elements instead (monotonic stack)
+		# 1 1 1 -> is a valid segment where we could apply 1 ops
+		# 1 0 1 -> this is invalid and we have to break down into two smaller segments -> 2 ops
 
-        stack = []
-        res = 0
-        for num in nums:
-            while (
-                len(stack) > 0 and stack[-1] > num
-            ):  # we encountered a smaller number -> the current segment would end right here -> pop very single bigger elements, example: stack = [3, 4], num = 2
-                stack.pop()
+		stack = []
+		res = 0
+		for num in nums:
+			while len(stack) > 0 and stack[-1] > num:  # we encountered a smaller number -> the current segment would end right here -> pop very single bigger elements, example: stack = [3, 4], num = 2
+				stack.pop()
 
-            if num == 0:
-                continue
+			if num == 0:
+				continue
 
-            if (
-                not stack or stack[-1] < num
-            ):  # num is bigger -> current segment could still extends and collect more elements, example: stack = [3], num = 4
-                res += 1
-                stack.append(num)
+			if not stack or stack[-1] < num:  # num is bigger -> current segment could still extends and collect more elements, example: stack = [3], num = 4
+				res += 1
+				stack.append(num)
 
-        # Time complexity: O(n)
-        # Space complexity: O(n)
+		# Time complexity: O(n)
+		# Space complexity: O(n)
 
-        return res
+		return res

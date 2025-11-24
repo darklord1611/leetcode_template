@@ -23,57 +23,57 @@
 
 
 class Solution:
-    def countAndSay(self, n: int) -> str:
-        # 1 -> 11 -> 21 -> 1211 -> 111221 -> 312211
+	def countAndSay(self, n: int) -> str:
+		# 1 -> 11 -> 21 -> 1211 -> 111221 -> 312211
 
-        def dfs(cur_len: int) -> str:
-            if cur_len == 1:
-                return "1"
+		def dfs(cur_len: int) -> str:
+			if cur_len == 1:
+				return "1"
 
-            res_str = dfs(cur_len - 1)
-            count = 1
-            cur_char = res_str[0]
-            encoded_str = ""
+			res_str = dfs(cur_len - 1)
+			count = 1
+			cur_char = res_str[0]
+			encoded_str = ""
 
-            for i in range(1, len(res_str)):
-                if res_str[i] == cur_char:
-                    count += 1
-                else:
-                    encoded_str += f"{count}{cur_char}"
-                    cur_char = res_str[i]
-                    count = 1
+			for i in range(1, len(res_str)):
+				if res_str[i] == cur_char:
+					count += 1
+				else:
+					encoded_str += f"{count}{cur_char}"
+					cur_char = res_str[i]
+					count = 1
 
-            encoded_str += f"{count}{cur_char}"
-            return encoded_str
+			encoded_str += f"{count}{cur_char}"
+			return encoded_str
 
-        res = dfs(n)
+		res = dfs(n)
 
-        # Time complexity: O(2^n)
-        # Space complexity: O(n)
-        return res
+		# Time complexity: O(2^n)
+		# Space complexity: O(n)
+		return res
 
 
 # BOTTOM-UP APPROACH
 class Solution2:
-    def countAndSay(self, n: int) -> str:
-        # 1 -> 11 -> 21 -> 1211 -> 111221 -> 312211
-        res = "1"
+	def countAndSay(self, n: int) -> str:
+		# 1 -> 11 -> 21 -> 1211 -> 111221 -> 312211
+		res = "1"
 
-        for _ in range(1, n):
-            temp_str = res
-            encoded_str = ""
-            cur_char = temp_str[0]
-            count = 1
-            for i in range(1, len(temp_str)):
-                if temp_str[i] == cur_char:
-                    count += 1
-                else:
-                    encoded_str += f"{count}{cur_char}"
-                    cur_char = temp_str[i]
-                    count = 1
+		for _ in range(1, n):
+			temp_str = res
+			encoded_str = ""
+			cur_char = temp_str[0]
+			count = 1
+			for i in range(1, len(temp_str)):
+				if temp_str[i] == cur_char:
+					count += 1
+				else:
+					encoded_str += f"{count}{cur_char}"
+					cur_char = temp_str[i]
+					count = 1
 
-            encoded_str += f"{count}{cur_char}"
+			encoded_str += f"{count}{cur_char}"
 
-            res = encoded_str
+			res = encoded_str
 
-        return res
+		return res

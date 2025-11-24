@@ -22,33 +22,33 @@
 
 
 # Your solution starts here
-from typing import List
 from collections import defaultdict
+from typing import List
 
 
 class Solution:
-    def minimumIndex(self, nums: List[int]) -> int:
-        # both arrays after split have the same dominant element -> original array also have a single dominant element
+	def minimumIndex(self, nums: List[int]) -> int:
+		# both arrays after split have the same dominant element -> original array also have a single dominant element
 
-        freq = defaultdict(int)
-        n = len(nums)
-        max_num = -1
-        cur_max_count = 0
-        for num in nums:
-            freq[num] += 1
-            if freq[num] > cur_max_count:
-                cur_max_count = freq[num]
-                max_num = num
+		freq = defaultdict(int)
+		n = len(nums)
+		max_num = -1
+		cur_max_count = 0
+		for num in nums:
+			freq[num] += 1
+			if freq[num] > cur_max_count:
+				cur_max_count = freq[num]
+				max_num = num
 
-        # got the most frequent number in the array -> now loop through each index and check if the split is valid
-        cur_max_count = 0
+		# got the most frequent number in the array -> now loop through each index and check if the split is valid
+		cur_max_count = 0
 
-        for i in range(0, n - 1):
-            if nums[i] == max_num:
-                cur_max_count += 1
+		for i in range(0, n - 1):
+			if nums[i] == max_num:
+				cur_max_count += 1
 
-            if cur_max_count >= (i + 1) // 2 + 1:  # first part of array after split
-                if freq[max_num] - cur_max_count >= (n - i - 1) // 2 + 1:  # 2nd part
-                    return i
+			if cur_max_count >= (i + 1) // 2 + 1:  # first part of array after split
+				if freq[max_num] - cur_max_count >= (n - i - 1) // 2 + 1:  # 2nd part
+					return i
 
-        return -1
+		return -1

@@ -24,35 +24,33 @@ from typing import List
 
 
 class Solution:
-    def countSubarrays(self, nums: List[int], minK: int, maxK: int) -> int:
-        # sliding window for the best
-        # the number of valid subarrays would be the sum of valid subarrays that end at every possible index i
-        # keep track of the last maxK and minK and also last invalid index
-        # Example: [1,3,5,2,7,5] -> min_index = 0, max_index = 5, invalid_index = 4
-        # What are the possbilities at a single index i?
-        # count the possible starting points for valid subarrays that end at current index -> valid choices would be from [last_invalid_index + 1, min(last_min_index, last_max_index)]
+	def countSubarrays(self, nums: List[int], minK: int, maxK: int) -> int:
+		# sliding window for the best
+		# the number of valid subarrays would be the sum of valid subarrays that end at every possible index i
+		# keep track of the last maxK and minK and also last invalid index
+		# Example: [1,3,5,2,7,5] -> min_index = 0, max_index = 5, invalid_index = 4
+		# What are the possbilities at a single index i?
+		# count the possible starting points for valid subarrays that end at current index -> valid choices would be from [last_invalid_index + 1, min(last_min_index, last_max_index)]
 
-        n = len(nums)
-        last_min_index = -1
-        last_max_index = -1
-        last_invalid_index = -1
-        res = 0
+		n = len(nums)
+		last_min_index = -1
+		last_max_index = -1
+		last_invalid_index = -1
+		res = 0
 
-        for i in range(n):
-            if nums[i] == minK:
-                last_min_index = i
-            if nums[i] == maxK:
-                last_max_index = i
-            if nums[i] < minK or nums[i] > maxK:
-                last_invalid_index = i
+		for i in range(n):
+			if nums[i] == minK:
+				last_min_index = i
+			if nums[i] == maxK:
+				last_max_index = i
+			if nums[i] < minK or nums[i] > maxK:
+				last_invalid_index = i
 
-            if (
-                last_invalid_index > min(last_min_index, last_max_index)
-            ):  # why min? because we need both min and max values to be in the array to be valid
-                continue
-            res += min(last_min_index, last_max_index) - last_invalid_index
+			if last_invalid_index > min(last_min_index, last_max_index):  # why min? because we need both min and max values to be in the array to be valid
+				continue
+			res += min(last_min_index, last_max_index) - last_invalid_index
 
-        # Time Complexity: O(n)
-        # Space Complexity: O(1)
+		# Time Complexity: O(n)
+		# Space Complexity: O(1)
 
-        return res
+		return res

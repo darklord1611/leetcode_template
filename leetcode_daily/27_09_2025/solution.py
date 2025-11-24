@@ -15,19 +15,17 @@ from typing import List
 
 
 class Solution:
-    def largestTriangleArea(self, points: List[List[int]]) -> float:
-        # Shoelace's formula
+	def largestTriangleArea(self, points: List[List[int]]) -> float:
+		# Shoelace's formula
 
-        def calc_triangle_area(a, b, c):
-            return 0.5 * abs(
-                a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])
-            )
+		def calc_triangle_area(a, b, c):
+			return 0.5 * abs(a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]))
 
-        max_area = 0
-        for a, b, c in combinations(points, 3):
-            cur_area = calc_triangle_area(a, b, c)
-            max_area = max(max_area, cur_area)
+		max_area = 0
+		for a, b, c in combinations(points, 3):
+			cur_area = calc_triangle_area(a, b, c)
+			max_area = max(max_area, cur_area)
 
-        # Time complexity: O(n^3)
-        # Space complexity: O(1)
-        return max_area
+		# Time complexity: O(n^3)
+		# Space complexity: O(1)
+		return max_area
