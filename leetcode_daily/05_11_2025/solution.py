@@ -16,6 +16,8 @@
 
 
 # Your solution starts here
+from collections import defaultdict
+
 from sortedcontainers import SortedList
 
 

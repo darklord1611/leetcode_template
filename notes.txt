@@ -31,3 +31,5 @@ extern "C" void solve(const float* A, const float* B, float* C, int N) {
     // Step 5: Wait for completion
     cudaDeviceSynchronize();
 }
+
+__syncthreads() -> block level
