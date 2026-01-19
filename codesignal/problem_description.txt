@@ -1,0 +1,99 @@
+1) Cloud Storage System (All Levels)
+
+Status: Confirmed as an ICF-style problem on InterviewDB.
+Public info: Although the full prompt isn’t available publicly, CodeSignal’s official Industry Coding Framework example in its own documentation describes a similar file hosting or storage system task — building a simplified file hosting service in a multi-level project with backward compatibility and refactoring requirements.
+
+Typical expected features from community pattern:
+
+Add/remove files
+
+Search by prefix, sort by size
+
+Apply sort filters and quotas
+
+Possibly TTL or versioning in later levels
+
+Key takeaway: This problem type simulates persistent storage with progressive complexity — including refactoring and extension — rather than a simple one-off algorithm.
+
+📌 2) Banking System
+
+Public community description: Reddit posts describe a Banking System ICF assessment where the candidate must build:
+
+Level 1: Basic operations — add, withdraw, transfer money.
+
+Level 2: Query operations — e.g., find top N accounts by number of transactions.
+
+Level 3: Time-aware transactions with timestamps — e.g., transfer logic requiring timestamp constraints.
+
+Level 4 (reported by community): Possibly merging accounts and histories.
+
+Summary: This is a classic ICF real-world scenario. You must manage and extend stateful account logic over multiple levels.
+
+📌 3) In-Memory Database
+
+Community shared prompt details: A thread on 1point3acres provides extensive detail for an In-Memory Database ICF question:
+
+Level 1: Support key–value storage with field manipulation (set/get/delete).
+
+Level 2: Filtering or displaying fields based on conditions.
+
+Level 3: Introduce TTL (Time-To-Live) for records.
+
+Level 4: Backup and restore functionality with timestamp semantics.
+
+These details come from actual forum reports of candidates sharing their experience with this exact problem type.
+
+🚫 4) Recipe Manager
+
+Status: InterviewDB lists Recipe Manager as an ICF problem.
+Public prompts: No public detailed prompt is available on major forums or shared question banks — which is typical for CodeSignal ICF problems (they are proprietary and not widely scraped).
+
+Reasonable expectation (based on pattern):
+
+Data entities representing recipes and ingredients
+
+CRUD operations
+
+Aggregations (e.g., total calories, ingredient aggregations, cost)
+
+Sorting, filtering queries
+
+Later levels may introduce versioning or refactoring
+
+(This pattern inference is based on typical ICF stateful project problems, not a public prompt.)
+
+🚫 5) Task Management System
+
+Status: InterviewDB tags this as Industry Coding Framework.
+Public info: No detailed public prompt text exists on Reddit, GitHub, or other free sources — but the common community classification means candidates have reported being asked this style of problem.
+
+Typical logical features for this type:
+
+Create tasks
+
+Update statuses
+
+Query tasks by filters (user, date, priority)
+
+Possibly deadlines or history aggregation
+
+Later levels may require extension and refactoring
+
+(Again, this is inferred based on naming and ICF patterns.)
+
+🚫 6) Working Hour Register Program
+
+Status: Confirmed as ICF in crowdsourced question banks.
+Public details: Not present in Reddit or public code repos at the moment.
+
+Likely expected behaviors (inferred):
+
+Track clock-in/out per employee
+
+Compute total hours
+
+Support date and employee filtration
+
+Regional rollups or adjustments in later levels
+
+This fits the stateful multi-operation ICF pattern.
