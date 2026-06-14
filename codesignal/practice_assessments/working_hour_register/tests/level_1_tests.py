@@ -14,105 +14,80 @@ from working_hour_register_impl import WorkingHourRegisterImpl
 
 class Level1Tests(unittest.TestCase):
 	"""
-	Level 1 tests for Working Hour Register - Basic Clock In/Out Operations
+	Level 1 tests for Working Hour Register - Basic Clock In/Out
 
-	Tests cover: CLOCK_IN, CLOCK_OUT, GET_TOTAL_HOURS, IS_CLOCKED_IN, GET_EMPLOYEES_WORKING
+	Tests cover: clock_in, clock_out, is_clocked_in, get_total_hours
 	All tests have a 0.4 second timeout.
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh WorkingHourRegister instance for each test."""
 		self.whr = WorkingHourRegisterImpl()
 
 	@timeout(0.4)
 	def test_level_1_case_01_clock_in(self):
-		"""Test clocking in an employee."""
-		result = self.whr.clock_in(1000000, "emp001")
-		self.assertEqual(result, "true")
+		self.assertEqual(self.whr.clock_in(1, "a"), "true")
 
 	@timeout(0.4)
-	def test_level_1_case_02_clock_in_twice(self):
-		"""Test that clocking in when already clocked in returns false."""
-		self.whr.clock_in(1000000, "emp001")
-		result = self.whr.clock_in(2000000, "emp001")
-		self.assertEqual(result, "false")
+	def test_level_1_case_02_clock_in_already_in(self):
+		self.whr.clock_in(1, "a")
+		self.assertEqual(self.whr.clock_in(2, "a"), "false")
 
 	@timeout(0.4)
-	def test_level_1_case_03_is_clocked_in(self):
-		"""Test checking if employee is clocked in."""
-		self.whr.clock_in(1000000, "emp001")
-		self.assertEqual(self.whr.is_clocked_in("emp001"), "true")
-		self.assertEqual(self.whr.is_clocked_in("emp002"), "false")
+	def test_level_1_case_03_is_clocked_in_true(self):
+		self.whr.clock_in(1, "a")
+		self.assertEqual(self.whr.is_clocked_in(2, "a"), "true")
 
 	@timeout(0.4)
-	def test_level_1_case_04_clock_out_basic(self):
-		"""Test basic clock out and hours calculation."""
-		self.whr.clock_in(1000000, "emp001")
-		# 9000000 ms = 2.5 hours, rounded down to 2
-		result = self.whr.clock_out(10000000, "emp001")
-		self.assertEqual(result, "2")
+	def test_level_1_case_04_is_clocked_in_unknown(self):
+		self.assertEqual(self.whr.is_clocked_in(1, "missing"), "false")
 
 	@timeout(0.4)
-	def test_level_1_case_05_clock_out_not_clocked_in(self):
-		"""Test clocking out when not clocked in returns empty string."""
-		result = self.whr.clock_out(10000000, "emp001")
-		self.assertEqual(result, "")
+	def test_level_1_case_05_clock_out_returns_duration(self):
+		self.whr.clock_in(1, "a")
+		self.assertEqual(self.whr.clock_out(9, "a"), "8")
 
 	@timeout(0.4)
-	def test_level_1_case_06_get_total_hours(self):
-		"""Test getting total hours across multiple sessions."""
-		self.whr.clock_in(1000000, "emp001")
-		self.whr.clock_out(10000000, "emp001")  # 2 hours
-		self.whr.clock_in(11000000, "emp001")
-		self.whr.clock_out(25000000, "emp001")  # 3 hours
-		result = self.whr.get_total_hours("emp001")
-		self.assertEqual(result, "5")
+	def test_level_1_case_06_clock_out_not_in(self):
+		self.whr.clock_in(1, "a")
+		self.whr.clock_out(5, "a")
+		self.assertEqual(self.whr.clock_out(7, "a"), "")
 
 	@timeout(0.4)
-	def test_level_1_case_07_get_employees_working(self):
-		"""Test getting list of currently working employees."""
-		self.whr.clock_in(1000000, "emp001")
-		self.whr.clock_in(1500000, "emp002")
-		result = self.whr.get_employees_working(1800000)
-		self.assertEqual(result, "emp001, emp002")
+	def test_level_1_case_07_clock_out_unknown(self):
+		self.assertEqual(self.whr.clock_out(1, "missing"), "")
 
 	@timeout(0.4)
-	def test_level_1_case_08_get_employees_working_after_clock_out(self):
-		"""Test employees working list after some clock out."""
-		self.whr.clock_in(1000000, "emp001")
-		self.whr.clock_in(1500000, "emp002")
-		self.whr.clock_out(10000000, "emp001")
-		result = self.whr.get_employees_working(11000000)
-		self.assertEqual(result, "emp002")
+	def test_level_1_case_08_is_clocked_in_after_out(self):
+		self.whr.clock_in(1, "a")
+		self.whr.clock_out(5, "a")
+		self.assertEqual(self.whr.is_clocked_in(6, "a"), "false")
 
 	@timeout(0.4)
-	def test_level_1_case_09_multiple_employees(self):
-		"""Test tracking multiple employees independently."""
-		self.assertEqual(self.whr.clock_in(1000000, "emp001"), "true")
-		self.assertEqual(self.whr.clock_in(1500000, "emp002"), "true")
-		self.assertEqual(self.whr.clock_out(10000000, "emp001"), "2")
-		self.assertEqual(self.whr.is_clocked_in("emp001"), "false")
-		self.assertEqual(self.whr.is_clocked_in("emp002"), "true")
+	def test_level_1_case_09_total_hours_sums_sessions(self):
+		self.whr.clock_in(1, "a")
+		self.whr.clock_out(5, "a")   # 4
+		self.whr.clock_in(10, "a")
+		self.whr.clock_out(13, "a")  # 3
+		self.assertEqual(self.whr.get_total_hours(20, "a"), "7")
 
 	@timeout(0.4)
-	def test_level_1_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_1."""
-		self.assertEqual(self.whr.clock_in(1000000, "emp001"), "true")
-		self.assertEqual(self.whr.clock_in(1500000, "emp002"), "true")
-		self.assertEqual(self.whr.is_clocked_in("emp001"), "true")
-		self.assertEqual(self.whr.is_clocked_in("emp003"), "false")
-		self.assertEqual(self.whr.clock_in(2000000, "emp001"), "false")
-		self.assertEqual(self.whr.get_employees_working(1800000), "emp001, emp002")
-		self.assertEqual(self.whr.clock_out(10000000, "emp001"), "2")
-		self.assertEqual(self.whr.is_clocked_in("emp001"), "false")
-		self.assertEqual(self.whr.get_total_hours("emp001"), "2")
-		self.assertEqual(self.whr.clock_in(11000000, "emp001"), "true")
-		self.assertEqual(self.whr.clock_out(25000000, "emp001"), "3")
-		self.assertEqual(self.whr.get_total_hours("emp001"), "5")
-		self.assertEqual(self.whr.clock_out(30000000, "emp002"), "7916")
-		self.assertEqual(self.whr.get_total_hours("emp002"), "7916")
+	def test_level_1_case_10_total_hours_unknown(self):
+		self.assertEqual(self.whr.get_total_hours(1, "missing"), "0")
+
+	@timeout(0.4)
+	def test_level_1_case_11_total_excludes_open_session(self):
+		self.whr.clock_in(1, "a")
+		self.whr.clock_out(5, "a")   # 4
+		self.whr.clock_in(10, "a")   # still open
+		self.assertEqual(self.whr.get_total_hours(20, "a"), "4")
+
+	@timeout(0.4)
+	def test_level_1_case_12_reclock_after_out(self):
+		self.whr.clock_in(1, "a")
+		self.whr.clock_out(5, "a")
+		self.assertEqual(self.whr.clock_in(6, "a"), "true")
 
 
 if __name__ == "__main__":

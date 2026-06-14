@@ -14,139 +14,96 @@ from working_hour_register_impl import WorkingHourRegisterImpl
 
 class Level2Tests(unittest.TestCase):
 	"""
-	Level 2 tests for Working Hour Register - Date-Based Queries
+	Level 2 tests for Working Hour Register - Range Queries
 
-	Tests cover: GET_HOURS_ON_DATE, GET_HOURS_IN_RANGE, GET_EMPLOYEES_BY_DATE,
-	             GET_TOP_EMPLOYEES_BY_HOURS, GET_AVERAGE_DAILY_HOURS
+	Tests cover: get_hours_in_range, get_top_employees_by_hours
 	All tests have a 0.4 second timeout.
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh WorkingHourRegister instance for each test."""
 		self.whr = WorkingHourRegisterImpl()
 
 	@timeout(0.4)
-	def test_level_2_case_01_get_hours_on_date_single_session(self):
-		"""Test getting hours for a specific date with one session."""
-		# 2024-01-15 09:00 to 17:00 = 8 hours
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		result = self.whr.get_hours_on_date("emp001", "2024-01-15")
-		self.assertEqual(result, "8")
+	def test_level_2_case_01_range_full_session(self):
+		self.whr.clock_in(2, "a")
+		self.whr.clock_out(10, "a")  # session [2,10) = 8
+		self.assertEqual(self.whr.get_hours_in_range(20, "a", 0, 20), "8")
 
 	@timeout(0.4)
-	def test_level_2_case_02_get_hours_on_date_different_dates(self):
-		"""Test getting hours across different dates."""
-		# 2024-01-15 09:00 to 17:00 = 8 hours
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		# 2024-01-16 09:00 to 15:00 = 6 hours
-		self.whr.clock_in(1705395600000, "emp001")
-		self.whr.clock_out(1705417200000, "emp001")
-		self.assertEqual(self.whr.get_hours_on_date("emp001", "2024-01-15"), "8")
-		self.assertEqual(self.whr.get_hours_on_date("emp001", "2024-01-16"), "6")
+	def test_level_2_case_02_range_clips_left(self):
+		self.whr.clock_in(2, "a")
+		self.whr.clock_out(10, "a")  # [2,10)
+		self.assertEqual(self.whr.get_hours_in_range(20, "a", 5, 20), "5")
 
 	@timeout(0.4)
-	def test_level_2_case_03_get_hours_in_range(self):
-		"""Test getting total hours in a date range."""
-		# 2024-01-15 09:00 to 17:00 = 8 hours
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		# 2024-01-16 09:00 to 15:00 = 6 hours
-		self.whr.clock_in(1705395600000, "emp001")
-		self.whr.clock_out(1705417200000, "emp001")
-		result = self.whr.get_hours_in_range("emp001", "2024-01-15", "2024-01-16")
-		self.assertEqual(result, "14")
+	def test_level_2_case_03_range_clips_right(self):
+		self.whr.clock_in(2, "a")
+		self.whr.clock_out(10, "a")  # [2,10)
+		self.assertEqual(self.whr.get_hours_in_range(20, "a", 0, 6), "4")
 
 	@timeout(0.4)
-	def test_level_2_case_04_get_employees_by_date(self):
-		"""Test getting all employees who worked on a date."""
-		# Both emp001 and emp002 work on 2024-01-15
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		self.whr.clock_in(1705309200000, "emp002")
-		self.whr.clock_out(1705345200000, "emp002")
-		result = self.whr.get_employees_by_date("2024-01-15")
-		self.assertEqual(result, "emp001, emp002")
+	def test_level_2_case_04_range_clips_both(self):
+		self.whr.clock_in(2, "a")
+		self.whr.clock_out(20, "a")  # [2,20)
+		self.assertEqual(self.whr.get_hours_in_range(30, "a", 5, 11), "6")
 
 	@timeout(0.4)
-	def test_level_2_case_05_get_top_employees_by_hours(self):
-		"""Test getting top employees by total hours worked."""
-		# emp001: 8 + 6 = 14 hours
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		self.whr.clock_in(1705395600000, "emp001")
-		self.whr.clock_out(1705417200000, "emp001")
-		# emp002: 10 hours
-		self.whr.clock_in(1705309200000, "emp002")
-		self.whr.clock_out(1705345200000, "emp002")
-		result = self.whr.get_top_employees_by_hours(2)
-		self.assertEqual(result, "emp001(14), emp002(10)")
+	def test_level_2_case_05_range_no_overlap(self):
+		self.whr.clock_in(2, "a")
+		self.whr.clock_out(10, "a")  # [2,10)
+		self.assertEqual(self.whr.get_hours_in_range(20, "a", 12, 20), "0")
 
 	@timeout(0.4)
-	def test_level_2_case_06_get_average_daily_hours(self):
-		"""Test calculating average daily hours for an employee."""
-		# emp001: 8 + 6 = 14 hours over 2 days = 7 average
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		self.whr.clock_in(1705395600000, "emp001")
-		self.whr.clock_out(1705417200000, "emp001")
-		result = self.whr.get_average_daily_hours("emp001")
-		self.assertEqual(result, "7")
+	def test_level_2_case_06_range_multiple_sessions(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(5, "a")    # [0,5)
+		self.whr.clock_in(10, "a")
+		self.whr.clock_out(20, "a")   # [10,20)
+		# window [3,15): 2 from first + 5 from second = 7
+		self.assertEqual(self.whr.get_hours_in_range(30, "a", 3, 15), "7")
 
 	@timeout(0.4)
-	def test_level_2_case_07_get_top_employees_limit(self):
-		"""Test top employees with limit less than total employees."""
-		# emp001: 14 hours
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		self.whr.clock_in(1705395600000, "emp001")
-		self.whr.clock_out(1705417200000, "emp001")
-		# emp002: 10 hours
-		self.whr.clock_in(1705309200000, "emp002")
-		self.whr.clock_out(1705345200000, "emp002")
-		# emp003: 5 hours
-		self.whr.clock_in(1705309200000, "emp003")
-		self.whr.clock_out(1705327200000, "emp003")
-		result = self.whr.get_top_employees_by_hours(2)
-		self.assertEqual(result, "emp001(14), emp002(10)")
+	def test_level_2_case_07_range_unknown_employee(self):
+		self.assertEqual(self.whr.get_hours_in_range(20, "missing", 0, 20), "0")
 
 	@timeout(0.4)
-	def test_level_2_case_08_get_hours_on_date_no_work(self):
-		"""Test getting hours for a date with no work."""
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		result = self.whr.get_hours_on_date("emp001", "2024-01-16")
-		self.assertEqual(result, "0")
+	def test_level_2_case_08_top_basic_order(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(10, "a")  # 10
+		self.whr.clock_in(0, "b")
+		self.whr.clock_out(3, "b")   # 3
+		self.assertEqual(self.whr.get_top_employees_by_hours(20, 2), "a(10), b(3)")
 
 	@timeout(0.4)
-	def test_level_2_case_09_get_hours_in_range_single_date(self):
-		"""Test hours in range with single date."""
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		result = self.whr.get_hours_in_range("emp001", "2024-01-15", "2024-01-15")
-		self.assertEqual(result, "8")
+	def test_level_2_case_09_top_tie_by_id(self):
+		self.whr.clock_in(0, "b")
+		self.whr.clock_out(5, "b")   # 5
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(5, "a")   # 5
+		self.assertEqual(self.whr.get_top_employees_by_hours(20, 2), "a(5), b(5)")
 
 	@timeout(0.4)
-	def test_level_2_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_2."""
-		# emp001 works 2024-01-15 09:00-17:00 (8 hours)
-		self.assertEqual(self.whr.clock_in(1705309200000, "emp001"), "true")
-		self.assertEqual(self.whr.clock_out(1705338000000, "emp001"), "8")
-		# emp001 works 2024-01-16 09:00-15:00 (6 hours)
-		self.assertEqual(self.whr.clock_in(1705395600000, "emp001"), "true")
-		self.assertEqual(self.whr.clock_out(1705417200000, "emp001"), "6")
-		# emp002 works 2024-01-15 09:00-19:00 (10 hours)
-		self.assertEqual(self.whr.clock_in(1705309200000, "emp002"), "true")
-		self.assertEqual(self.whr.clock_out(1705345200000, "emp002"), "10")
-		self.assertEqual(self.whr.get_hours_on_date("emp001", "2024-01-15"), "8")
-		self.assertEqual(self.whr.get_hours_on_date("emp001", "2024-01-16"), "6")
-		self.assertEqual(self.whr.get_hours_in_range("emp001", "2024-01-15", "2024-01-16"), "14")
-		self.assertEqual(self.whr.get_employees_by_date("2024-01-15"), "emp001, emp002")
-		self.assertEqual(self.whr.get_top_employees_by_hours(2), "emp001(14), emp002(10)")
-		self.assertEqual(self.whr.get_average_daily_hours("emp001"), "7")
+	def test_level_2_case_10_top_limit_n(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(10, "a")
+		self.whr.clock_in(0, "b")
+		self.whr.clock_out(7, "b")
+		self.whr.clock_in(0, "c")
+		self.whr.clock_out(3, "c")
+		self.assertEqual(self.whr.get_top_employees_by_hours(20, 2), "a(10), b(7)")
+
+	@timeout(0.4)
+	def test_level_2_case_11_top_none(self):
+		self.assertEqual(self.whr.get_top_employees_by_hours(20, 3), "")
+
+	@timeout(0.4)
+	def test_level_2_case_12_top_excludes_open_session(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(4, "a")   # 4 completed
+		self.whr.clock_in(10, "a")   # open, ignored
+		self.assertEqual(self.whr.get_top_employees_by_hours(20, 1), "a(4)")
 
 
 if __name__ == "__main__":

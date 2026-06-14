@@ -14,123 +14,99 @@ from working_hour_register_impl import WorkingHourRegisterImpl
 
 class Level3Tests(unittest.TestCase):
 	"""
-	Level 3 tests for Working Hour Register - Payroll and Breaks
+	Level 3 tests for Working Hour Register - Breaks & Overtime Pay
 
-	Tests cover: SET_HOURLY_RATE, CALCULATE_OVERTIME_HOURS, GET_PAY_FOR_DATE,
-	             ADD_BREAK, GET_EMPLOYEES_WITH_OVERTIME, GET_TOTAL_PAY
+	Tests cover: set_hourly_rate, add_break, get_pay, and breaks woven into
+	get_total_hours / get_hours_in_range.
 	All tests have a 0.4 second timeout.
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh WorkingHourRegister instance for each test."""
 		self.whr = WorkingHourRegisterImpl()
 
 	@timeout(0.4)
-	def test_level_3_case_01_set_hourly_rate(self):
-		"""Test setting hourly rate for an employee."""
-		result = self.whr.set_hourly_rate("emp001", 25)
-		self.assertEqual(result, "true")
+	def test_level_3_case_01_set_rate(self):
+		self.whr.clock_in(1, "a")
+		self.assertEqual(self.whr.set_hourly_rate(2, "a", 10), "true")
 
 	@timeout(0.4)
-	def test_level_3_case_02_calculate_overtime_hours(self):
-		"""Test calculating overtime hours (hours > 8)."""
-		# 2024-01-15 09:00 to 19:00 = 10 hours, overtime = 2
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705345200000, "emp001")
-		result = self.whr.calculate_overtime_hours("emp001", "2024-01-15")
-		self.assertEqual(result, "2")
+	def test_level_3_case_02_set_rate_unknown(self):
+		self.assertEqual(self.whr.set_hourly_rate(1, "missing", 10), "false")
 
 	@timeout(0.4)
-	def test_level_3_case_03_calculate_overtime_no_overtime(self):
-		"""Test calculating overtime when hours <= 8."""
-		# 2024-01-15 09:00 to 17:00 = 8 hours, overtime = 0
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		result = self.whr.calculate_overtime_hours("emp001", "2024-01-15")
-		self.assertEqual(result, "0")
+	def test_level_3_case_03_add_break_subtracts_total(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(10, "a")  # 10
+		self.assertEqual(self.whr.add_break(11, "a", 3, 5), "true")  # -2
+		self.assertEqual(self.whr.get_total_hours(20, "a"), "8")
 
 	@timeout(0.4)
-	def test_level_3_case_04_get_pay_for_date_no_overtime(self):
-		"""Test calculating pay with no overtime (8 hours)."""
-		# 8 hours * $25 = $200
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705338000000, "emp001")
-		self.whr.set_hourly_rate("emp001", 25)
-		result = self.whr.get_pay_for_date("emp001", "2024-01-15")
-		self.assertEqual(result, "200")
+	def test_level_3_case_04_break_outside_session(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(10, "a")  # [0,10)
+		self.assertEqual(self.whr.add_break(11, "a", 8, 12), "false")
+		self.assertEqual(self.whr.get_total_hours(20, "a"), "10")
 
 	@timeout(0.4)
-	def test_level_3_case_05_get_pay_for_date_with_overtime(self):
-		"""Test calculating pay with overtime."""
-		# 10 hours: 8 * $25 + 2 * $25 * 1.5 = $200 + $75 = $275
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705345200000, "emp001")
-		self.whr.set_hourly_rate("emp001", 25)
-		result = self.whr.get_pay_for_date("emp001", "2024-01-15")
-		self.assertEqual(result, "275")
+	def test_level_3_case_05_break_spanning_two_sessions(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(5, "a")    # [0,5)
+		self.whr.clock_in(10, "a")
+		self.whr.clock_out(20, "a")   # [10,20)
+		# [4,12) is not within a single session
+		self.assertEqual(self.whr.add_break(21, "a", 4, 12), "false")
+		self.assertEqual(self.whr.get_total_hours(30, "a"), "15")
 
 	@timeout(0.4)
-	def test_level_3_case_06_add_break(self):
-		"""Test adding a break that reduces hours worked."""
-		# 2024-01-16 09:00 to 17:00 = 8 hours, minus 1 hour break = 7 hours
-		self.whr.clock_in(1705395600000, "emp002")
-		# Break: 1 hour (1705402800000 to 1705406400000)
-		self.whr.add_break(1705402800000, 1705406400000, "emp002")
-		result = self.whr.clock_out(1705424400000, "emp002")
-		self.assertEqual(result, "7")
+	def test_level_3_case_06_break_empty_window(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(10, "a")
+		self.assertEqual(self.whr.add_break(11, "a", 5, 5), "false")
 
 	@timeout(0.4)
-	def test_level_3_case_07_get_pay_for_date_with_break(self):
-		"""Test calculating pay with break deduction."""
-		# 7 hours * $20 = $140
-		self.whr.clock_in(1705395600000, "emp002")
-		self.whr.add_break(1705402800000, 1705406400000, "emp002")
-		self.whr.clock_out(1705424400000, "emp002")
-		self.whr.set_hourly_rate("emp002", 20)
-		result = self.whr.get_pay_for_date("emp002", "2024-01-16")
-		self.assertEqual(result, "140")
+	def test_level_3_case_07_break_affects_range(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(20, "a")  # [0,20)
+		self.whr.add_break(21, "a", 5, 9)  # -4 break inside window
+		# window [0,10): raw 10, minus break overlap 4 = 6
+		self.assertEqual(self.whr.get_hours_in_range(30, "a", 0, 10), "6")
 
 	@timeout(0.4)
-	def test_level_3_case_08_get_employees_with_overtime(self):
-		"""Test getting employees who worked overtime on a date."""
-		# emp001 works 10 hours (has overtime)
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705345200000, "emp001")
-		# emp002 works 7 hours (no overtime)
-		self.whr.clock_in(1705395600000, "emp002")
-		self.whr.clock_out(1705421200000, "emp002")
-		result = self.whr.get_employees_with_overtime("2024-01-15")
-		self.assertEqual(result, "emp001")
+	def test_level_3_case_08_pay_regular_only(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(30, "a")  # 30 hours
+		self.whr.set_hourly_rate(31, "a", 10)
+		self.assertEqual(self.whr.get_pay(40, "a"), "300")
 
 	@timeout(0.4)
-	def test_level_3_case_09_get_total_pay(self):
-		"""Test getting total pay across all dates."""
-		# emp001 works 10 hours on 2024-01-15: 8*25 + 2*25*1.5 = 275
-		self.whr.clock_in(1705309200000, "emp001")
-		self.whr.clock_out(1705345200000, "emp001")
-		self.whr.set_hourly_rate("emp001", 25)
-		result = self.whr.get_total_pay("emp001")
-		self.assertEqual(result, "275")
+	def test_level_3_case_09_pay_with_overtime(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(50, "a")  # 50 hours: 40 reg + 10 ot
+		self.whr.set_hourly_rate(51, "a", 10)
+		# 40*10 + (10*10*3)//2 = 400 + 150 = 550
+		self.assertEqual(self.whr.get_pay(60, "a"), "550")
 
 	@timeout(0.4)
-	def test_level_3_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_3."""
-		# emp001 works 10 hours on 2024-01-15
-		self.assertEqual(self.whr.clock_in(1705309200000, "emp001"), "true")
-		self.assertEqual(self.whr.clock_out(1705345200000, "emp001"), "10")
-		self.assertEqual(self.whr.set_hourly_rate("emp001", 25), "true")
-		self.assertEqual(self.whr.calculate_overtime_hours("emp001", "2024-01-15"), "2")
-		self.assertEqual(self.whr.get_pay_for_date("emp001", "2024-01-15"), "275")
-		# emp002 works 8 hours with 1 hour break on 2024-01-16
-		self.assertEqual(self.whr.clock_in(1705395600000, "emp002"), "true")
-		self.assertEqual(self.whr.add_break(1705402800000, 1705406400000, "emp002"), "true")
-		self.assertEqual(self.whr.clock_out(1705424400000, "emp002"), "7")
-		self.assertEqual(self.whr.set_hourly_rate("emp002", 20), "true")
-		self.assertEqual(self.whr.get_pay_for_date("emp002", "2024-01-16"), "140")
-		self.assertEqual(self.whr.get_employees_with_overtime("2024-01-15"), "emp001")
-		self.assertEqual(self.whr.get_total_pay("emp001"), "275")
+	def test_level_3_case_10_pay_no_rate(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(10, "a")
+		self.assertEqual(self.whr.get_pay(20, "a"), "0")
+
+	@timeout(0.4)
+	def test_level_3_case_11_pay_no_hours(self):
+		self.whr.clock_in(0, "a")
+		self.whr.set_hourly_rate(1, "a", 10)
+		self.assertEqual(self.whr.get_pay(20, "a"), "0")
+
+	@timeout(0.4)
+	def test_level_3_case_12_pay_after_break(self):
+		self.whr.clock_in(0, "a")
+		self.whr.clock_out(44, "a")   # 44 hours
+		self.whr.add_break(45, "a", 0, 4)  # -4 -> 40 hours
+		self.whr.set_hourly_rate(46, "a", 10)
+		self.assertEqual(self.whr.get_pay(50, "a"), "400")
 
 
 if __name__ == "__main__":

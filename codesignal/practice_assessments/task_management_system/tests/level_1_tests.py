@@ -14,102 +14,75 @@ from timeout_decorator import timeout
 
 class Level1Tests(unittest.TestCase):
 	"""
-	Level 1 tests for Task Management System - Basic CRUD Operations
+	Level 1 tests for Task Management System - Basic CRUD
 
-	Tests cover: CREATE_TASK, GET_TASK, UPDATE_STATUS, UPDATE_PRIORITY, DELETE_TASK
-	All tests have a 0.4 second timeout.
+	Tests cover: create_task, update_status, update_priority, get_task, delete_task
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh TaskManagementSystem instance for each test."""
 		self.tms = TaskManagementSystemImpl()
 
 	@timeout(0.4)
 	def test_level_1_case_01_create_task(self):
-		"""Test creating a new task."""
-		result = self.tms.create_task("task1", "alice", 1)
-		self.assertEqual(result, "true")
+		self.assertEqual(self.tms.create_task(1, "t1", 5), "true")
 
 	@timeout(0.4)
-	def test_level_1_case_02_create_duplicate_task(self):
-		"""Test that duplicate task creation returns false."""
-		self.tms.create_task("task1", "alice", 1)
-		result = self.tms.create_task("task1", "bob", 2)
-		self.assertEqual(result, "false")
+	def test_level_1_case_02_create_duplicate(self):
+		self.tms.create_task(1, "t1", 5)
+		self.assertEqual(self.tms.create_task(2, "t1", 9), "false")
 
 	@timeout(0.4)
 	def test_level_1_case_03_get_task(self):
-		"""Test getting task details."""
-		self.tms.create_task("task1", "alice", 2)
-		result = self.tms.get_task("task1")
-		self.assertEqual(result, "user:alice,status:TODO,priority:2")
+		self.tms.create_task(1, "t1", 5)
+		self.assertEqual(self.tms.get_task(2, "t1"), "t1(5,open)")
 
 	@timeout(0.4)
-	def test_level_1_case_04_get_nonexistent_task(self):
-		"""Test getting non-existent task returns empty string."""
-		result = self.tms.get_task("nonexistent")
-		self.assertEqual(result, "")
+	def test_level_1_case_04_get_missing(self):
+		self.assertEqual(self.tms.get_task(1, "missing"), "")
 
 	@timeout(0.4)
 	def test_level_1_case_05_update_status(self):
-		"""Test updating task status."""
-		self.tms.create_task("task1", "alice", 1)
-		result = self.tms.update_status("task1", "IN_PROGRESS")
-		self.assertEqual(result, "IN_PROGRESS")
-		# Verify status changed
-		task = self.tms.get_task("task1")
-		self.assertEqual(task, "user:alice,status:IN_PROGRESS,priority:1")
+		self.tms.create_task(1, "t1", 5)
+		self.assertEqual(self.tms.update_status(2, "t1", "in_progress"), "true")
+		self.assertEqual(self.tms.get_task(3, "t1"), "t1(5,in_progress)")
 
 	@timeout(0.4)
-	def test_level_1_case_06_update_status_nonexistent_task(self):
-		"""Test updating status of non-existent task returns empty string."""
-		result = self.tms.update_status("nonexistent", "DONE")
-		self.assertEqual(result, "")
+	def test_level_1_case_06_update_status_missing(self):
+		self.assertEqual(self.tms.update_status(1, "missing", "done"), "")
 
 	@timeout(0.4)
 	def test_level_1_case_07_update_priority(self):
-		"""Test updating task priority."""
-		self.tms.create_task("task1", "bob", 3)
-		result = self.tms.update_priority("task1", 1)
-		self.assertEqual(result, "1")
-		# Verify priority changed
-		task = self.tms.get_task("task1")
-		self.assertEqual(task, "user:bob,status:TODO,priority:1")
+		self.tms.create_task(1, "t1", 5)
+		self.assertEqual(self.tms.update_priority(2, "t1", 8), "true")
+		self.assertEqual(self.tms.get_task(3, "t1"), "t1(8,open)")
 
 	@timeout(0.4)
-	def test_level_1_case_08_delete_task(self):
-		"""Test deleting a task."""
-		self.tms.create_task("task1", "alice", 1)
-		result = self.tms.delete_task("task1")
-		self.assertEqual(result, "true")
-		# Verify task is deleted
-		task = self.tms.get_task("task1")
-		self.assertEqual(task, "")
+	def test_level_1_case_08_update_priority_missing(self):
+		self.assertEqual(self.tms.update_priority(1, "missing", 3), "")
 
 	@timeout(0.4)
-	def test_level_1_case_09_delete_nonexistent_task(self):
-		"""Test deleting non-existent task returns false."""
-		result = self.tms.delete_task("nonexistent")
-		self.assertEqual(result, "false")
+	def test_level_1_case_09_delete_task(self):
+		self.tms.create_task(1, "t1", 5)
+		self.assertEqual(self.tms.delete_task(2, "t1"), "true")
+		self.assertEqual(self.tms.get_task(3, "t1"), "")
 
 	@timeout(0.4)
-	def test_level_1_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_1."""
-		self.assertEqual(self.tms.create_task("task1", "alice", 1), "true")
-		self.assertEqual(self.tms.create_task("task2", "bob", 3), "true")
-		self.assertEqual(self.tms.create_task("task3", "alice", 2), "true")
-		self.assertEqual(self.tms.create_task("task1", "charlie", 1), "false")  # Duplicate
-		self.assertEqual(self.tms.get_task("task1"), "user:alice,status:TODO,priority:1")
-		self.assertEqual(self.tms.update_status("task1", "IN_PROGRESS"), "IN_PROGRESS")
-		self.assertEqual(self.tms.get_task("task1"), "user:alice,status:IN_PROGRESS,priority:1")
-		self.assertEqual(self.tms.update_priority("task2", 1), "1")
-		self.assertEqual(self.tms.get_task("task2"), "user:bob,status:TODO,priority:1")
-		self.assertEqual(self.tms.update_status("task3", "DONE"), "DONE")
-		self.assertEqual(self.tms.delete_task("task3"), "true")
-		self.assertEqual(self.tms.get_task("task3"), "")  # Deleted
-		self.assertEqual(self.tms.update_status("nonexistent", "DONE"), "")
+	def test_level_1_case_10_delete_missing(self):
+		self.assertEqual(self.tms.delete_task(1, "missing"), "false")
+
+	@timeout(0.4)
+	def test_level_1_case_11_full_scenario(self):
+		self.assertEqual(self.tms.create_task(1, "t1", 5), "true")
+		self.assertEqual(self.tms.create_task(2, "t2", 3), "true")
+		self.assertEqual(self.tms.create_task(3, "t1", 1), "false")
+		self.assertEqual(self.tms.update_status(4, "t1", "done"), "true")
+		self.assertEqual(self.tms.update_priority(5, "t2", 9), "true")
+		self.assertEqual(self.tms.get_task(6, "t1"), "t1(5,done)")
+		self.assertEqual(self.tms.get_task(7, "t2"), "t2(9,open)")
+		self.assertEqual(self.tms.delete_task(8, "t2"), "true")
+		self.assertEqual(self.tms.delete_task(9, "t2"), "false")
 
 
 if __name__ == "__main__":

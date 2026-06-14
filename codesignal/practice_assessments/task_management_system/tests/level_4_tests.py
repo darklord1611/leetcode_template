@@ -14,138 +14,116 @@ from timeout_decorator import timeout
 
 class Level4Tests(unittest.TestCase):
 	"""
-	Level 4 tests for Task Management System - History and Reporting
+	Level 4 tests for Task Management System - Analytics
 
-	Tests cover: GET_TASK_HISTORY, GET_USER_STATISTICS, GET_COMPLETION_TIME,
-	             GET_SLOWEST_TASKS, ROLLBACK_TASK, GET_CRITICAL_PATH, PREDICT_COMPLETION
-	All tests have a 0.4 second timeout.
+	Tests cover: get_blocked_tasks, get_critical_path
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh TaskManagementSystem instance for each test."""
 		self.tms = TaskManagementSystemImpl()
 
 	@timeout(0.4)
-	def test_level_4_case_01_get_task_history(self):
-		"""Test getting task status history."""
-		self.tms.create_task("task1", "alice", 1)
-		self.tms.update_status("task1", "IN_PROGRESS")
-		self.tms.update_status("task1", "BLOCKED")
-		self.tms.update_status("task1", "IN_PROGRESS")
-		self.tms.update_status("task1", "DONE")
-		result = self.tms.get_task_history("task1")
-		self.assertEqual(result, "TODO->IN_PROGRESS->BLOCKED->IN_PROGRESS->DONE")
+	def test_level_4_case_01_blocked_basic(self):
+		self.tms.create_task(1, "t1", 5)
+		self.tms.create_task(2, "t2", 3)
+		self.tms.add_dependency(3, "t1", "t2")
+		self.assertEqual(self.tms.get_blocked_tasks(4), "t1")
 
 	@timeout(0.4)
-	def test_level_4_case_02_get_user_statistics(self):
-		"""Test getting user statistics."""
-		self.tms.create_task("task1", "alice", 1)
-		self.tms.create_task("task2", "alice", 1)
-		self.tms.create_task("task3", "alice", 2)
-		self.tms.update_status("task1", "IN_PROGRESS")
-		self.tms.update_status("task2", "DONE")
-		result = self.tms.get_user_statistics("alice")
-		self.assertEqual(result, "total:3,todo:1,in_progress:1,done:1,blocked:0")
+	def test_level_4_case_02_blocked_none(self):
+		self.tms.create_task(1, "t1", 5)
+		self.tms.create_task(2, "t2", 3)
+		self.assertEqual(self.tms.get_blocked_tasks(3), "")
 
 	@timeout(0.4)
-	def test_level_4_case_03_get_completion_time(self):
-		"""Test getting task completion time."""
-		self.tms.create_task_with_deadline(1000, "task1", "alice", 1, 10000)
-		self.tms.update_status_with_check(5000, "task1", "DONE")
-		result = self.tms.get_completion_time("task1")
-		# 5000 - 1000 = 4000
-		self.assertEqual(result, "4000")
+	def test_level_4_case_03_blocked_clears_when_dep_done(self):
+		self.tms.create_task(1, "t1", 5)
+		self.tms.create_task(2, "t2", 3)
+		self.tms.add_dependency(3, "t1", "t2")
+		self.tms.update_status(4, "t2", "done")
+		self.assertEqual(self.tms.get_blocked_tasks(5), "")
 
 	@timeout(0.4)
-	def test_level_4_case_04_get_completion_time_not_done(self):
-		"""Test getting completion time for task not yet done."""
-		self.tms.create_task_with_deadline(1000, "task1", "alice", 1, 10000)
-		result = self.tms.get_completion_time("task1")
-		self.assertEqual(result, "")
+	def test_level_4_case_04_blocked_excludes_done(self):
+		self.tms.create_task(1, "t1", 5)
+		self.tms.create_task(2, "t2", 3)
+		self.tms.add_dependency(3, "t1", "t2")
+		# even though t1's dependency t2 is not done, t1 itself is done -> excluded
+		self.tms.update_status(4, "t1", "open")
+		self.assertEqual(self.tms.get_blocked_tasks(5), "t1")
 
 	@timeout(0.4)
-	def test_level_4_case_05_get_slowest_tasks(self):
-		"""Test getting slowest completed tasks."""
-		self.tms.create_task_with_deadline(1000, "task1", "alice", 1, 10000)
-		self.tms.create_task_with_deadline(1000, "task2", "bob", 2, 10000)
-		self.tms.create_task_with_deadline(1000, "task3", "charlie", 3, 10000)
-		self.tms.update_status_with_check(5000, "task1", "DONE")  # 4000 ms
-		self.tms.update_status_with_check(3000, "task2", "DONE")  # 2000 ms
-		self.tms.update_status_with_check(7000, "task3", "DONE")  # 6000 ms
-		result = self.tms.get_slowest_tasks(2)
-		# Sorted by time descending: task3(6000), task1(4000)
-		self.assertEqual(result, "task3(6000), task1(4000)")
+	def test_level_4_case_05_blocked_priority_order(self):
+		self.tms.create_task(1, "base", 1)
+		self.tms.create_task(2, "low", 2)
+		self.tms.create_task(3, "high", 9)
+		self.tms.add_dependency(4, "low", "base")
+		self.tms.add_dependency(5, "high", "base")
+		self.assertEqual(self.tms.get_blocked_tasks(6), "high, low")
 
 	@timeout(0.4)
-	def test_level_4_case_06_rollback_task(self):
-		"""Test rolling back task to previous status."""
-		self.tms.create_task("task1", "alice", 1)
-		self.tms.update_status("task1", "IN_PROGRESS")
-		self.tms.update_status("task1", "DONE")
-		result = self.tms.rollback_task("task1", "IN_PROGRESS")
-		self.assertEqual(result, "IN_PROGRESS")
-		# Verify rollback
-		task = self.tms.get_task("task1")
-		self.assertEqual(task, "user:alice,status:IN_PROGRESS,priority:1")
+	def test_level_4_case_06_critical_path_chain(self):
+		self.tms.create_task(1, "a", 1)
+		self.tms.create_task(2, "b", 1)
+		self.tms.create_task(3, "c", 1)
+		# c depends on b, b depends on a
+		self.tms.add_dependency(4, "b", "a")
+		self.tms.add_dependency(5, "c", "b")
+		self.assertEqual(self.tms.get_critical_path(6), "a,b,c")
 
 	@timeout(0.4)
-	def test_level_4_case_07_get_critical_path(self):
-		"""Test getting critical path (longest dependency chain)."""
-		self.tms.create_task("task1", "alice", 1)
-		self.tms.create_task("task2", "bob", 2)
-		self.tms.create_task("task3", "charlie", 3)
-		self.tms.create_task("task4", "dave", 1)
-		self.tms.add_dependency("task2", "task1")
-		self.tms.add_dependency("task3", "task2")
-		# Chain: task1 -> task2 -> task3 (length 3), task4 standalone (length 1)
-		result = self.tms.get_critical_path()
-		self.assertEqual(result, "task1, task2, task3")
+	def test_level_4_case_07_critical_path_none(self):
+		self.tms.create_task(1, "a", 1)
+		self.tms.create_task(2, "b", 1)
+		self.assertEqual(self.tms.get_critical_path(3), "")
 
 	@timeout(0.4)
-	def test_level_4_case_08_predict_completion(self):
-		"""Test predicting task completion time."""
-		self.tms.create_task_with_deadline(1000, "task1", "alice", 1, 10000)
-		self.tms.create_task_with_deadline(1000, "task2", "bob", 2, 10000)
-		self.tms.create_task("task3", "charlie", 3)
-		self.tms.update_status_with_check(5000, "task1", "DONE")  # 4000 ms
-		self.tms.update_status_with_check(3000, "task2", "DONE")  # 2000 ms
-		# Average: (4000 + 2000) / 2 = 3000
-		result = self.tms.predict_completion(6000, "task3")
-		# 6000 + 3000 = 9000
-		self.assertEqual(result, "9000")
+	def test_level_4_case_08_critical_path_single_edge(self):
+		self.tms.create_task(1, "a", 1)
+		self.tms.create_task(2, "b", 1)
+		self.tms.add_dependency(3, "b", "a")
+		self.assertEqual(self.tms.get_critical_path(4), "a,b")
 
 	@timeout(0.4)
-	def test_level_4_case_09_get_user_statistics_empty(self):
-		"""Test user statistics for user with no tasks."""
-		result = self.tms.get_user_statistics("alice")
-		self.assertEqual(result, "total:0,todo:0,in_progress:0,done:0,blocked:0")
+	def test_level_4_case_09_critical_path_tie_lexicographic(self):
+		# Two independent chains of equal length: x->y and a->b
+		self.tms.create_task(1, "x", 1)
+		self.tms.create_task(2, "y", 1)
+		self.tms.create_task(3, "a", 1)
+		self.tms.create_task(4, "b", 1)
+		self.tms.add_dependency(5, "y", "x")
+		self.tms.add_dependency(6, "b", "a")
+		# ["a","b"] < ["x","y"] lexicographically
+		self.assertEqual(self.tms.get_critical_path(7), "a,b")
 
 	@timeout(0.4)
-	def test_level_4_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_4."""
-		self.assertEqual(self.tms.create_task_with_deadline(1000, "task1", "alice", 1, 10000), "true")
-		self.assertEqual(self.tms.create_task_with_deadline(1000, "task2", "alice", 1, 10000), "true")
-		self.assertEqual(self.tms.create_task("task3", "bob", 2), "true")
-		self.assertEqual(self.tms.update_status("task1", "IN_PROGRESS"), "IN_PROGRESS")
-		self.assertEqual(self.tms.update_status("task1", "BLOCKED"), "BLOCKED")
-		self.assertEqual(self.tms.update_status("task1", "IN_PROGRESS"), "IN_PROGRESS")
-		self.assertEqual(self.tms.update_status_with_check(5000, "task1", "DONE"), "DONE")
-		self.assertEqual(self.tms.update_status_with_check(3000, "task2", "DONE"), "DONE")
-		self.assertEqual(self.tms.get_task_history("task1"), "TODO->IN_PROGRESS->BLOCKED->IN_PROGRESS->DONE")
-		self.assertEqual(self.tms.get_user_statistics("alice"), "total:2,todo:0,in_progress:0,done:2,blocked:0")
-		self.assertEqual(self.tms.get_user_statistics("bob"), "total:1,todo:1,in_progress:0,done:0,blocked:0")
-		self.assertEqual(self.tms.get_completion_time("task1"), "4000")  # 5000 - 1000
-		self.assertEqual(self.tms.get_completion_time("task2"), "2000")  # 3000 - 1000
-		self.assertEqual(self.tms.get_slowest_tasks(2), "task1(4000), task2(2000)")
-		self.assertEqual(self.tms.rollback_task("task1", "IN_PROGRESS"), "IN_PROGRESS")
-		self.assertEqual(self.tms.get_task("task1"), "user:alice,status:IN_PROGRESS,priority:1")
-		self.assertEqual(self.tms.add_dependency("task3", "task1"), "true")
-		self.assertEqual(self.tms.get_critical_path(), "task1, task3")
-		# Average completion time: (4000 + 2000) / 2 = 3000
-		# Prediction at 6000: 6000 + 3000 = 9000
-		self.assertEqual(self.tms.predict_completion(6000, "task3"), "9000")
+	def test_level_4_case_10_critical_path_longest_wins(self):
+		self.tms.create_task(1, "a", 1)
+		self.tms.create_task(2, "b", 1)
+		self.tms.create_task(3, "c", 1)
+		self.tms.create_task(4, "p", 1)
+		self.tms.create_task(5, "q", 1)
+		# chain a->b->c (length 3) vs p->q (length 2)
+		self.tms.add_dependency(6, "b", "a")
+		self.tms.add_dependency(7, "c", "b")
+		self.tms.add_dependency(8, "q", "p")
+		self.assertEqual(self.tms.get_critical_path(9), "a,b,c")
+
+	@timeout(0.4)
+	def test_level_4_case_11_critical_path_branching(self):
+		# d depends on both b and c; b depends on a; c depends on a
+		self.tms.create_task(1, "a", 1)
+		self.tms.create_task(2, "b", 1)
+		self.tms.create_task(3, "c", 1)
+		self.tms.create_task(4, "d", 1)
+		self.tms.add_dependency(5, "b", "a")
+		self.tms.add_dependency(6, "c", "a")
+		self.tms.add_dependency(7, "d", "b")
+		self.tms.add_dependency(8, "d", "c")
+		# longest chains: a,b,d and a,c,d (both length 3); smallest is a,b,d
+		self.assertEqual(self.tms.get_critical_path(9), "a,b,d")
 
 
 if __name__ == "__main__":

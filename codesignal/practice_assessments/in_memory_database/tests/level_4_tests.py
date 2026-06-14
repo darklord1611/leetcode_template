@@ -14,145 +14,100 @@ from timeout_decorator import timeout
 
 class Level4Tests(unittest.TestCase):
 	"""
-	Level 4 tests for In-Memory Database - Backup and Restore
+	Level 4 tests for In-Memory Database - Backup & Restore
 
-	Tests cover: BACKUP, GET_BACKUP_INFO, RESTORE, COMPARE
-	All tests have a 0.4 second timeout.
+	Tests cover: backup, restore plus reopened reads
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh InMemoryDatabase instance for each test."""
 		self.db = InMemoryDatabaseImpl()
 
 	@timeout(0.4)
-	def test_level_4_case_01_create_backup(self):
-		"""Test creating a backup."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user1", "age", "30")
-		result = self.db.backup(2000)
-		self.assertEqual(result, "backup_1")
+	def test_level_4_case_01_backup_counts_keys(self):
+		self.db.set_field(1, "a", "f1", "1")
+		self.db.set_field(2, "b", "f1", "1")
+		self.assertEqual(self.db.backup(3), "2")
 
 	@timeout(0.4)
-	def test_level_4_case_02_multiple_backups(self):
-		"""Test creating multiple backups."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.assertEqual(self.db.backup(2000), "backup_1")
-		self.db.set_field_at(3000, "user2", "name", "Bob")
-		self.assertEqual(self.db.backup(4000), "backup_2")
+	def test_level_4_case_02_backup_ignores_expired(self):
+		self.db.set_field(1, "a", "f1", "1")
+		self.db.set_field_with_ttl(1, "b", "f1", "1", 5)
+		# at t=10 b is fully expired
+		self.assertEqual(self.db.backup(10), "1")
 
 	@timeout(0.4)
-	def test_level_4_case_03_get_backup_info(self):
-		"""Test getting backup information."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user1", "age", "30")
-		self.db.set_field_at(2000, "user2", "name", "Bob")
-		self.db.backup(2000)
-		result = self.db.get_backup_info("backup_1")
-		self.assertEqual(result, "keys:2,fields:3,timestamp:2000")
+	def test_level_4_case_03_backup_empty(self):
+		self.assertEqual(self.db.backup(1), "0")
 
 	@timeout(0.4)
-	def test_level_4_case_04_get_backup_info_with_ttl(self):
-		"""Test backup info includes TTL fields."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user1", "age", "30")
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 10000)
-		self.db.set_field_at(2000, "user2", "name", "Bob")
-		self.db.backup(2000)
-		result = self.db.get_backup_info("backup_1")
-		self.assertEqual(result, "keys:2,fields:4,timestamp:2000")
+	def test_level_4_case_04_restore_returns_true(self):
+		self.db.set_field(1, "a", "f1", "1")
+		self.db.backup(2)
+		self.assertEqual(self.db.restore(5, 2), "true")
 
 	@timeout(0.4)
-	def test_level_4_case_05_compare_backups(self):
-		"""Test comparing two backups."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user1", "age", "30")
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 10000)
-		self.db.set_field_at(2000, "user2", "name", "Bob")
-		self.db.backup(2000)
-		self.db.set_field_at(3000, "user1", "city", "NYC")
-		self.db.set_field_at(3000, "user3", "name", "Charlie")
-		self.db.backup(3000)
-		result = self.db.compare("backup_1", "backup_2")
-		self.assertEqual(result, "user1, user3")
+	def test_level_4_case_05_restore_brings_back_state(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.db.backup(2)
+		self.db.set_field(3, "a", "f1", "changed")
+		self.db.restore(5, 2)
+		self.assertEqual(self.db.get_field(6, "a", "f1"), "v1")
 
 	@timeout(0.4)
-	def test_level_4_case_06_restore_backup(self):
-		"""Test restoring from backup."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user1", "age", "30")
-		self.db.backup(2000)
-		self.db.delete("user1")
-		self.assertEqual(self.db.get_at(3000, "user1"), "")
-		# Restore should return number of keys restored
-		result = self.db.restore(3000, "backup_1")
-		self.assertEqual(result, "1")
-		# After restore, data should be accessible
-		self.assertEqual(self.db.get_at(3000, "user1"), "age(30), name(Alice)")
+	def test_level_4_case_06_restore_replaces_whole_db(self):
+		self.db.set_field(1, "a", "f1", "1")
+		self.db.backup(2)
+		self.db.set_field(3, "b", "f1", "1")
+		self.db.restore(5, 2)
+		self.assertEqual(self.db.get_field(6, "b", "f1"), "")
+		self.assertEqual(self.db.get_field(6, "a", "f1"), "1")
 
 	@timeout(0.4)
-	def test_level_4_case_07_restore_ttl_recalculation(self):
-		"""Test TTL recalculation after restore."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 10000)
-		self.db.backup(2000)
-		self.db.delete("user1")
-		self.db.restore(4000, "backup_1")
-		# Original TTL: expires at 1000 + 10000 = 11000
-		# At backup time (2000), remaining TTL = 11000 - 2000 = 9000
-		# After restore at 4000, new expiry = 4000 + 9000 = 13000
-		self.assertEqual(self.db.get_field_at(13000, "user1", "session"), "abc123")
-		self.assertEqual(self.db.get_field_at(13001, "user1", "session"), "")
+	def test_level_4_case_07_restore_preserves_remaining_ttl(self):
+		# field set at t=1 with ttl 100 -> expires at 101
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 100)
+		# backup at t=51: remaining ttl = 101 - 51 = 50
+		self.db.backup(51)
+		# restore at t=200: new expire = 200 + 50 = 250
+		self.db.restore(200, 51)
+		self.assertEqual(self.db.get_field(249, "a", "f1"), "v1")
+		self.assertEqual(self.db.get_field(250, "a", "f1"), "")
 
 	@timeout(0.4)
-	def test_level_4_case_08_restore_multiple_keys(self):
-		"""Test restoring multiple keys."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user1", "age", "30")
-		self.db.set_field_at(2000, "user2", "name", "Bob")
-		self.db.backup(2000)
-		self.db.delete("user1")
-		self.db.delete("user2")
-		result = self.db.restore(4000, "backup_1")
-		self.assertEqual(result, "2")
+	def test_level_4_case_08_restore_picks_most_recent_le(self):
+		self.db.set_field(1, "a", "f1", "first")
+		self.db.backup(2)
+		self.db.set_field(3, "a", "f1", "second")
+		self.db.backup(4)
+		# restore with backup_timestamp 3 -> most recent backup <= 3 is the t=2 one
+		self.db.restore(10, 3)
+		self.assertEqual(self.db.get_field(11, "a", "f1"), "first")
 
 	@timeout(0.4)
-	def test_level_4_case_09_backup_after_modifications(self):
-		"""Test backup captures latest state."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.backup(2000)
-		self.db.set_field_at(3000, "user1", "city", "NYC")
-		self.db.set_field_at(3000, "user3", "name", "Charlie")
-		self.db.backup(3000)
-		info1 = self.db.get_backup_info("backup_1")
-		info2 = self.db.get_backup_info("backup_2")
-		self.assertEqual(info1, "keys:1,fields:1,timestamp:2000")
-		self.assertEqual(info2, "keys:2,fields:2,timestamp:3000")
+	def test_level_4_case_09_restore_no_eligible_backup_noop(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.db.backup(5)
+		# no backup at time <= 3, so restore does nothing
+		self.db.restore(10, 3)
+		self.assertEqual(self.db.get_field(11, "a", "f1"), "v1")
 
 	@timeout(0.4)
-	def test_level_4_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_4."""
-		self.assertEqual(self.db.set_field_at(1000, "user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.set_field_at(1000, "user1", "age", "30"), "30")
-		self.assertEqual(self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 10000), "abc123")
-		self.assertEqual(self.db.set_field_at(2000, "user2", "name", "Bob"), "Bob")
-		self.assertEqual(self.db.backup(2000), "backup_1")
-		self.assertEqual(self.db.set_field_at(3000, "user1", "city", "NYC"), "NYC")
-		self.assertEqual(self.db.set_field_at(3000, "user3", "name", "Charlie"), "Charlie")
-		self.assertEqual(self.db.backup(3000), "backup_2")
-		self.assertEqual(self.db.get_backup_info("backup_1"), "keys:2,fields:4,timestamp:2000")
-		self.assertEqual(self.db.get_backup_info("backup_2"), "keys:3,fields:6,timestamp:3000")
-		self.assertEqual(self.db.compare("backup_1", "backup_2"), "user1, user3")
-		self.assertEqual(self.db.delete("user1"), "true")
-		self.assertEqual(self.db.delete("user2"), "true")
-		self.assertEqual(self.db.delete("user3"), "true")
-		self.assertEqual(self.db.get_at(4000, "user1"), "")
-		self.assertEqual(self.db.restore(4000, "backup_1"), "2")
-		self.assertEqual(self.db.get_at(4000, "user1"), "age(30), name(Alice), session(abc123)")
-		self.assertEqual(self.db.get_at(4000, "user2"), "name(Bob)")
-		self.assertEqual(self.db.get_field_at(13000, "user1", "session"), "abc123")
-		self.assertEqual(self.db.get_field_at(13001, "user1", "session"), "")
+	def test_level_4_case_10_restore_permanent_stays_permanent(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.db.backup(2)
+		self.db.restore(1000, 2)
+		self.assertEqual(self.db.get_field(99999, "a", "f1"), "v1")
+
+	@timeout(0.4)
+	def test_level_4_case_11_get_record_after_restore(self):
+		self.db.set_field(1, "a", "b", "2")
+		self.db.set_field(2, "a", "a", "1")
+		self.db.backup(3)
+		self.db.set_field(4, "a", "c", "3")
+		self.db.restore(5, 3)
+		self.assertEqual(self.db.get_record(6, "a"), "a=1, b=2")
 
 
 if __name__ == "__main__":

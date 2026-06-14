@@ -14,142 +14,101 @@ from timeout_decorator import timeout
 
 class Level2Tests(unittest.TestCase):
 	"""
-	Level 2 tests for Recipe Manager - Nutritional Properties and Queries
+	Level 2 tests for Recipe Manager - Ingredient Properties & Totals
 
-	Tests cover: ADD_INGREDIENT_WITH_PROPS, GET_TOTAL_CALORIES, GET_TOTAL_COST,
-	             FIND_RECIPES_BY_INGREDIENT, GET_MOST_EXPENSIVE_RECIPES
-	All tests have a 0.4 second timeout.
+	Tests cover: set_ingredient_info, get_total_calories, get_total_cost,
+	             find_recipes_by_ingredient
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh RecipeManager instance for each test."""
 		self.manager = RecipeManagerImpl()
 
 	@timeout(0.4)
-	def test_level_2_case_01_add_ingredient_with_props(self):
-		"""Test adding ingredient with nutritional properties."""
-		self.manager.add_recipe("pasta_carbonara")
-		result = self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2")
-		self.assertEqual(result, "200")
+	def test_level_2_case_01_set_ingredient_info(self):
+		self.assertEqual(self.manager.set_ingredient_info(1, "flour", 4, 1), "true")
 
 	@timeout(0.4)
-	def test_level_2_case_02_get_total_calories(self):
-		"""Test calculating total calories for a recipe."""
-		self.manager.add_recipe("pasta_carbonara")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "bacon", "100", "500", "5")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "eggs", "2", "70", "1")
-		result = self.manager.get_total_calories("pasta_carbonara")
-		# 200*150 + 100*500 + 2*70 = 30000 + 50000 + 140 = 80140
-		self.assertEqual(result, "80140")
+	def test_level_2_case_02_total_calories(self):
+		self.manager.set_ingredient_info(1, "flour", 4, 1)
+		self.manager.set_ingredient_info(2, "egg", 70, 2)
+		self.manager.add_recipe(3, "pancakes")
+		self.manager.add_ingredient(4, "pancakes", "flour", 100)
+		self.manager.add_ingredient(5, "pancakes", "egg", 2)
+		# 100*4 + 2*70 = 540
+		self.assertEqual(self.manager.get_total_calories(6, "pancakes"), "540")
 
 	@timeout(0.4)
-	def test_level_2_case_03_get_total_cost(self):
-		"""Test calculating total cost for a recipe."""
-		self.manager.add_recipe("pasta_carbonara")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "bacon", "100", "500", "5")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "eggs", "2", "70", "1")
-		result = self.manager.get_total_cost("pasta_carbonara")
-		# 200*2 + 100*5 + 2*1 = 400 + 500 + 2 = 902... wait, expected is 542
-		# Let me recalculate: 200*2 + 100*5 + 2*1 = 400 + 500 + 2 = 902
-		# But test expects 542. Checking test_data_2...
-		# Actually from the test: 200*2 + 100*5 + 2*1 = 400 + 500 + 2 = 902? No, expected is 542
-		# Let me check the original test output comment more carefully
-		# Expected says 542, so 200*2 + 100*5 + 2*1 should be 400+500+2=902...
-		# Let me look at the calculation again - maybe it's (200/100)*2 for cost per unit?
-		# Actually I think the issue is quantity units - let me use test expectation
-		self.assertEqual(result, "542")
+	def test_level_2_case_03_total_cost(self):
+		self.manager.set_ingredient_info(1, "flour", 4, 1)
+		self.manager.set_ingredient_info(2, "egg", 70, 2)
+		self.manager.add_recipe(3, "pancakes")
+		self.manager.add_ingredient(4, "pancakes", "flour", 100)
+		self.manager.add_ingredient(5, "pancakes", "egg", 2)
+		# 100*1 + 2*2 = 104
+		self.assertEqual(self.manager.get_total_cost(6, "pancakes"), "104")
 
 	@timeout(0.4)
-	def test_level_2_case_04_find_recipes_by_ingredient(self):
-		"""Test finding recipes by ingredient."""
-		self.manager.add_recipe("pasta_carbonara")
-		self.manager.add_recipe("chicken_salad")
-		self.manager.add_recipe("beef_stew")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2")
-		self.manager.add_ingredient_with_props("chicken_salad", "lettuce", "100", "15", "1")
-		self.manager.add_ingredient_with_props("beef_stew", "beef", "300", "250", "12")
-		result = self.manager.find_recipes_by_ingredient("lettuce")
-		self.assertEqual(result, "chicken_salad")
+	def test_level_2_case_04_default_zero_props(self):
+		self.manager.add_recipe(1, "plain")
+		self.manager.add_ingredient(2, "plain", "water", 500)
+		self.assertEqual(self.manager.get_total_calories(3, "plain"), "0")
+		self.assertEqual(self.manager.get_total_cost(4, "plain"), "0")
 
 	@timeout(0.4)
-	def test_level_2_case_05_find_recipes_by_ingredient_multiple(self):
-		"""Test finding multiple recipes by ingredient."""
-		self.manager.add_recipe("pasta_carbonara")
-		self.manager.add_recipe("pasta_primavera")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2")
-		self.manager.add_ingredient_with_props("pasta_primavera", "pasta", "150", "150", "2")
-		result = self.manager.find_recipes_by_ingredient("pasta")
-		self.assertEqual(result, "pasta_carbonara, pasta_primavera")
+	def test_level_2_case_05_info_is_global(self):
+		self.manager.set_ingredient_info(1, "egg", 70, 2)
+		self.manager.add_recipe(2, "omelette")
+		self.manager.add_recipe(3, "cake")
+		self.manager.add_ingredient(4, "omelette", "egg", 3)
+		self.manager.add_ingredient(5, "cake", "egg", 4)
+		self.assertEqual(self.manager.get_total_calories(6, "omelette"), "210")
+		self.assertEqual(self.manager.get_total_calories(7, "cake"), "280")
 
 	@timeout(0.4)
-	def test_level_2_case_06_get_most_expensive_recipes(self):
-		"""Test getting most expensive recipes."""
-		self.manager.add_recipe("pasta_carbonara")
-		self.manager.add_recipe("chicken_salad")
-		self.manager.add_recipe("beef_stew")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "bacon", "100", "500", "5")
-		self.manager.add_ingredient_with_props("pasta_carbonara", "eggs", "2", "70", "1")
-		self.manager.add_ingredient_with_props("chicken_salad", "chicken", "150", "200", "8")
-		self.manager.add_ingredient_with_props("chicken_salad", "lettuce", "100", "15", "1")
-		self.manager.add_ingredient_with_props("beef_stew", "beef", "300", "250", "12")
-		self.manager.add_ingredient_with_props("beef_stew", "carrots", "100", "40", "1")
-		result = self.manager.get_most_expensive_recipes("2")
-		# beef_stew: 300*12 + 100*1 = 3600 + 100 = 3700
-		# pasta_carbonara: 542 (from previous calculation)
-		self.assertEqual(result, "beef_stew(3700), pasta_carbonara(542)")
+	def test_level_2_case_06_info_overwrite(self):
+		self.manager.set_ingredient_info(1, "egg", 70, 2)
+		self.manager.add_recipe(2, "omelette")
+		self.manager.add_ingredient(3, "omelette", "egg", 2)
+		self.assertEqual(self.manager.get_total_calories(4, "omelette"), "140")
+		self.manager.set_ingredient_info(5, "egg", 80, 3)
+		self.assertEqual(self.manager.get_total_calories(6, "omelette"), "160")
+		self.assertEqual(self.manager.get_total_cost(7, "omelette"), "6")
 
 	@timeout(0.4)
-	def test_level_2_case_07_get_most_expensive_recipes_with_tie(self):
-		"""Test most expensive recipes with tie-breaking by name."""
-		self.manager.add_recipe("recipe_a")
-		self.manager.add_recipe("recipe_b")
-		self.manager.add_recipe("recipe_c")
-		self.manager.add_ingredient_with_props("recipe_a", "ing1", "100", "100", "5")
-		self.manager.add_ingredient_with_props("recipe_b", "ing1", "100", "100", "5")
-		self.manager.add_ingredient_with_props("recipe_c", "ing1", "100", "100", "3")
-		result = self.manager.get_most_expensive_recipes("3")
-		# recipe_a: 500, recipe_b: 500, recipe_c: 300
-		self.assertEqual(result, "recipe_a(500), recipe_b(500), recipe_c(300)")
+	def test_level_2_case_07_totals_missing_recipe(self):
+		self.assertEqual(self.manager.get_total_calories(1, "missing"), "")
+		self.assertEqual(self.manager.get_total_cost(2, "missing"), "")
 
 	@timeout(0.4)
-	def test_level_2_case_08_total_calories_empty_recipe(self):
-		"""Test total calories for recipe with no ingredients."""
-		self.manager.add_recipe("empty_recipe")
-		result = self.manager.get_total_calories("empty_recipe")
-		self.assertEqual(result, "0")
+	def test_level_2_case_08_empty_recipe_totals(self):
+		self.manager.add_recipe(1, "empty")
+		self.assertEqual(self.manager.get_total_calories(2, "empty"), "0")
+		self.assertEqual(self.manager.get_total_cost(3, "empty"), "0")
 
 	@timeout(0.4)
-	def test_level_2_case_09_find_recipes_no_match(self):
-		"""Test finding recipes with no matches."""
-		self.manager.add_recipe("pasta")
-		self.manager.add_ingredient_with_props("pasta", "pasta", "200", "150", "2")
-		result = self.manager.find_recipes_by_ingredient("nonexistent")
-		self.assertEqual(result, "")
+	def test_level_2_case_09_find_recipes_by_ingredient(self):
+		self.manager.add_recipe(1, "pancakes")
+		self.manager.add_recipe(2, "cake")
+		self.manager.add_recipe(3, "soup")
+		self.manager.add_ingredient(4, "pancakes", "egg", 2)
+		self.manager.add_ingredient(5, "cake", "egg", 4)
+		self.manager.add_ingredient(6, "soup", "water", 500)
+		self.assertEqual(self.manager.find_recipes_by_ingredient(7, "egg"), "cake, pancakes")
 
 	@timeout(0.4)
-	def test_level_2_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_2."""
-		self.assertEqual(self.manager.add_recipe("pasta_carbonara"), "true")
-		self.assertEqual(self.manager.add_recipe("chicken_salad"), "true")
-		self.assertEqual(self.manager.add_recipe("beef_stew"), "true")
-		self.assertEqual(self.manager.add_ingredient_with_props("pasta_carbonara", "pasta", "200", "150", "2"), "200")
-		self.assertEqual(self.manager.add_ingredient_with_props("pasta_carbonara", "bacon", "100", "500", "5"), "100")
-		self.assertEqual(self.manager.add_ingredient_with_props("pasta_carbonara", "eggs", "2", "70", "1"), "2")
-		self.assertEqual(self.manager.add_ingredient_with_props("chicken_salad", "chicken", "150", "200", "8"), "150")
-		self.assertEqual(self.manager.add_ingredient_with_props("chicken_salad", "lettuce", "100", "15", "1"), "100")
-		self.assertEqual(self.manager.add_ingredient_with_props("beef_stew", "beef", "300", "250", "12"), "300")
-		self.assertEqual(self.manager.add_ingredient_with_props("beef_stew", "carrots", "100", "40", "1"), "100")
-		self.assertEqual(self.manager.get_total_calories("pasta_carbonara"), "80140")
-		self.assertEqual(self.manager.get_total_cost("pasta_carbonara"), "542")
-		self.assertEqual(self.manager.get_total_calories("beef_stew"), "79000")
-		self.assertEqual(self.manager.find_recipes_by_ingredient("lettuce"), "chicken_salad")
-		self.assertEqual(self.manager.find_recipes_by_ingredient("pasta"), "pasta_carbonara")
-		self.assertEqual(self.manager.get_most_expensive_recipes("2"), "beef_stew(3700), pasta_carbonara(542)")
+	def test_level_2_case_10_find_recipes_none(self):
+		self.manager.add_recipe(1, "pancakes")
+		self.manager.add_ingredient(2, "pancakes", "egg", 2)
+		self.assertEqual(self.manager.find_recipes_by_ingredient(3, "sugar"), "")
+
+	@timeout(0.4)
+	def test_level_2_case_11_find_after_remove(self):
+		self.manager.add_recipe(1, "pancakes")
+		self.manager.add_ingredient(2, "pancakes", "egg", 2)
+		self.manager.remove_ingredient(3, "pancakes", "egg")
+		self.assertEqual(self.manager.find_recipes_by_ingredient(4, "egg"), "")
 
 
 if __name__ == "__main__":

@@ -14,112 +14,77 @@ from timeout_decorator import timeout
 
 class Level3Tests(unittest.TestCase):
 	"""
-	Level 3 tests for In-Memory Database - Time-Aware Operations with TTL
+	Level 3 tests for In-Memory Database - TTL
 
-	Tests cover: SET_FIELD_AT, SET_FIELD_WITH_TTL, GET_FIELD_AT, GET_AT,
-	             SCAN_AT, SCAN_BY_FIELD_AT, DELETE_FIELD_AT
-	All tests have a 0.4 second timeout.
+	Tests cover: set_field_with_ttl plus reopened reads
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh InMemoryDatabase instance for each test."""
 		self.db = InMemoryDatabaseImpl()
 
 	@timeout(0.4)
-	def test_level_3_case_01_set_and_get_field_at_timestamp(self):
-		"""Test setting and getting field at specific timestamp."""
-		self.assertEqual(self.db.set_field_at(1000, "user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.get_field_at(3000, "user1", "name"), "Alice")
+	def test_level_3_case_01_ttl_returns_true(self):
+		self.assertEqual(self.db.set_field_with_ttl(1, "a", "f1", "v1", 10), "true")
 
 	@timeout(0.4)
-	def test_level_3_case_02_set_field_with_ttl(self):
-		"""Test setting field with TTL."""
-		self.assertEqual(self.db.set_field_at(1000, "user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 5000), "abc123")
-		self.assertEqual(self.db.get_field_at(3000, "user1", "session"), "abc123")
+	def test_level_3_case_02_get_field_before_expiry(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 10)
+		self.assertEqual(self.db.get_field(5, "a", "f1"), "v1")
 
 	@timeout(0.4)
-	def test_level_3_case_03_ttl_expiration_exact(self):
-		"""Test that field expires exactly at TTL timestamp."""
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 5000)
-		# Valid at timestamp 5999 (1000 + 5000 - 1)
-		self.assertEqual(self.db.get_field_at(5999, "user1", "session"), "abc123")
-		# Expired at timestamp 6000 (1000 + 5000)
-		self.assertEqual(self.db.get_field_at(6000, "user1", "session"), "")
+	def test_level_3_case_03_get_field_on_expiry_boundary(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 10)
+		# expires at 1 + 10 = 11 (exclusive)
+		self.assertEqual(self.db.get_field(11, "a", "f1"), "")
 
 	@timeout(0.4)
-	def test_level_3_case_04_get_at_with_mixed_fields(self):
-		"""Test GET_AT with both permanent and TTL fields."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 5000)
-		result = self.db.get_at(3000, "user1")
-		self.assertEqual(result, "name(Alice), session(abc123)")
+	def test_level_3_case_04_get_field_just_before_expiry(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 10)
+		self.assertEqual(self.db.get_field(10, "a", "f1"), "v1")
 
 	@timeout(0.4)
-	def test_level_3_case_05_get_at_after_ttl_expiration(self):
-		"""Test GET_AT after TTL field has expired."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 5000)
-		# Session expires at 6000, so at 7000 only name should be present
-		result = self.db.get_at(7000, "user1")
-		self.assertEqual(result, "name(Alice)")
+	def test_level_3_case_05_plain_set_is_permanent(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 10)
+		self.db.set_field(2, "a", "f1", "v2")
+		self.assertEqual(self.db.get_field(100, "a", "f1"), "v2")
 
 	@timeout(0.4)
-	def test_level_3_case_06_multiple_fields_with_different_ttls(self):
-		"""Test multiple fields with different TTL values."""
-		self.db.set_field_at(1000, "user2", "name", "Bob")
-		self.db.set_field_with_ttl(2000, "user2", "token", "xyz789", 3000)
-		# Token valid until 5000 (2000 + 3000)
-		self.assertEqual(self.db.get_field_at(4999, "user2", "token"), "xyz789")
-		self.assertEqual(self.db.get_field_at(5000, "user2", "token"), "")
+	def test_level_3_case_06_get_record_ignores_expired(self):
+		self.db.set_field(1, "a", "perm", "p")
+		self.db.set_field_with_ttl(1, "a", "temp", "t", 5)
+		self.assertEqual(self.db.get_record(10, "a"), "perm=p")
 
 	@timeout(0.4)
-	def test_level_3_case_07_scan_at_timestamp(self):
-		"""Test scanning keys at specific timestamp."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user2", "name", "Bob")
-		result = self.db.scan_at(3000, "user")
-		self.assertEqual(result, "user1, user2")
+	def test_level_3_case_07_record_gone_when_all_expired(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 5)
+		self.assertEqual(self.db.get_record(10, "a"), "")
 
 	@timeout(0.4)
-	def test_level_3_case_08_scan_by_field_at_timestamp(self):
-		"""Test scanning by field value at specific timestamp."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_at(1000, "user2", "name", "Bob")
-		result = self.db.scan_by_field_at(3000, "name", "Alice")
-		self.assertEqual(result, "user1")
+	def test_level_3_case_08_scan_prefix_ignores_expired(self):
+		self.db.set_field(1, "a", "f1", "1")
+		self.db.set_field_with_ttl(1, "a", "f2", "2", 5)
+		self.assertEqual(self.db.scan_prefix(10, "a", "f"), "f1=1")
 
 	@timeout(0.4)
-	def test_level_3_case_09_delete_field_at_timestamp(self):
-		"""Test deleting field at specific timestamp."""
-		self.db.set_field_at(1000, "user1", "name", "Alice")
-		self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 5000)
-		self.assertEqual(self.db.delete_field_at(3000, "user1", "session"), "true")
-		# After deletion, field should not be accessible
-		self.assertEqual(self.db.get_field_at(4000, "user1", "session"), "")
+	def test_level_3_case_09_top_n_keys_ignores_expired(self):
+		self.db.set_field(1, "a", "f1", "1")
+		self.db.set_field_with_ttl(1, "a", "f2", "2", 5)
+		self.db.set_field(1, "b", "f1", "1")
+		# at t=10 a has 1 live field, b has 1; tie -> a, b
+		self.assertEqual(self.db.top_n_keys(10, 2), "a(1), b(1)")
 
 	@timeout(0.4)
-	def test_level_3_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_3."""
-		self.assertEqual(self.db.set_field_at(1000, "user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.set_field_with_ttl(1000, "user1", "session", "abc123", 5000), "abc123")
-		self.assertEqual(self.db.set_field_at(1000, "user2", "name", "Bob"), "Bob")
-		self.assertEqual(self.db.set_field_with_ttl(2000, "user2", "token", "xyz789", 3000), "xyz789")
-		self.assertEqual(self.db.get_field_at(3000, "user1", "name"), "Alice")
-		self.assertEqual(self.db.get_field_at(3000, "user1", "session"), "abc123")
-		self.assertEqual(self.db.get_field_at(6000, "user1", "session"), "")
-		self.assertEqual(self.db.get_field_at(5999, "user1", "session"), "abc123")
-		self.assertEqual(self.db.get_at(3000, "user1"), "name(Alice), session(abc123)")
-		self.assertEqual(self.db.get_at(7000, "user1"), "name(Alice)")
-		self.assertEqual(self.db.get_field_at(4999, "user2", "token"), "xyz789")
-		self.assertEqual(self.db.get_field_at(5000, "user2", "token"), "")
-		self.assertEqual(self.db.scan_at(3000, "user"), "user1, user2")
-		self.assertEqual(self.db.scan_at(7000, "user"), "user1, user2")
-		self.assertEqual(self.db.scan_by_field_at(3000, "name", "Alice"), "user1")
-		self.assertEqual(self.db.delete_field_at(3000, "user1", "session"), "true")
-		self.assertEqual(self.db.get_field_at(4000, "user1", "session"), "")
+	def test_level_3_case_10_top_n_keys_drops_fully_expired_key(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "1", 5)
+		self.db.set_field(1, "b", "f1", "1")
+		self.assertEqual(self.db.top_n_keys(10, 5), "b(1)")
+
+	@timeout(0.4)
+	def test_level_3_case_11_delete_expired_field_returns_false(self):
+		self.db.set_field_with_ttl(1, "a", "f1", "v1", 5)
+		self.assertEqual(self.db.delete_field(10, "a", "f1"), "false")
 
 
 if __name__ == "__main__":
