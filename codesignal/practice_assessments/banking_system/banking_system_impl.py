@@ -5,9 +5,8 @@ class BankingSystemImpl(BankingSystem):
 	"""
 	Implementation of the BankingSystem interface.
 
-	Students should implement all methods defined in the BankingSystem base class.
-	Implement one level at a time, keeping in mind that you will need to refactor
-	to support additional functionality in later levels.
+	The function set is small on purpose. Implement one level at a time and
+	expect to reopen earlier functions to satisfy later requirements.
 	"""
 
 	def __init__(self):
@@ -18,67 +17,52 @@ class BankingSystemImpl(BankingSystem):
 	# Level 1 Methods: Basic Operations
 
 	def create_account(self, timestamp: int, account_id: str) -> str:
-		"""Create a new account with zero balance."""
+		"""Create a new account with balance 0."""
 		# TODO: implement
 		pass
 
 	def deposit(self, timestamp: int, account_id: str, amount: int) -> str:
-		"""Deposit money into an account."""
+		"""Add amount to the account's balance."""
 		# TODO: implement
 		pass
 
-	def withdraw(self, timestamp: int, account_id: str, amount: int) -> str:
-		"""Withdraw money from an account."""
+	def pay(self, timestamp: int, account_id: str, amount: int) -> str:
+		"""Withdraw amount from the account (an outgoing payment)."""
 		# TODO: implement
 		pass
 
 	def transfer(self, timestamp: int, source_account_id: str, target_account_id: str, amount: int) -> str:
-		"""Transfer money from one account to another."""
+		"""Move amount from source to target."""
 		# TODO: implement
 		pass
 
-	# Level 2 Methods: Query Operations
+	# Level 2 Methods: Outgoing Totals & Ranking
 
 	def top_spenders(self, timestamp: int, n: int) -> str:
-		"""Get the top N accounts by total amount spent."""
+		"""Return the top n accounts by outgoing total."""
 		# TODO: implement
 		pass
 
-	def get_payment_history(self, timestamp: int, account_id: str, n: int) -> str:
-		"""Get the last N transactions for an account."""
+	# Level 3 Methods: Scheduled Payments
+
+	def schedule_payment(self, timestamp: int, account_id: str, amount: int, delay: int) -> str:
+		"""Schedule a payment from account_id to execute at timestamp + delay."""
 		# TODO: implement
 		pass
 
-	# Level 3 Methods: Scheduled Payments and Acceptance
-
-	def schedule_payment(self, timestamp: int, account_id: str, amount: int, payment_type: str, delay: int) -> str:
-		"""Schedule a payment to execute after a delay."""
+	def cancel_payment(self, timestamp: int, account_id: str, payment_id: str) -> str:
+		"""Cancel a not-yet-executed scheduled payment belonging to account_id."""
 		# TODO: implement
 		pass
 
-	def accept_payment(self, timestamp: int, account_id: str, payment_id: str) -> str:
-		"""Accept a payment that requires 2FA confirmation."""
+	# Level 4 Methods: Merging Accounts & Historical Balance
+
+	def merge_accounts(self, timestamp: int, account_id_1: str, account_id_2: str) -> str:
+		"""Merge account_id_2 into account_id_1."""
 		# TODO: implement
 		pass
 
-	def top_activity(self, timestamp: int, n: int) -> str:
-		"""Get the top N accounts by number of transactions."""
-		# TODO: implement
-		pass
-
-	# Level 4 Methods: Merge Accounts and Statistics
-
-	def get_bank_statistics(self, timestamp: int) -> str:
-		"""Get overall bank statistics."""
-		# TODO: implement
-		pass
-
-	def merge_accounts(self, timestamp: int, account_id1: str, account_id2: str) -> str:
-		"""Merge two accounts, combining their balances and histories."""
-		# TODO: implement
-		pass
-
-	def cashback(self, timestamp: int, account_id: str, percentage: int) -> str:
-		"""Apply cashback rewards to an account."""
+	def get_balance(self, timestamp: int, account_id: str, time_at: int) -> str:
+		"""Return the account's balance as it was at the historical time time_at."""
 		# TODO: implement
 		pass

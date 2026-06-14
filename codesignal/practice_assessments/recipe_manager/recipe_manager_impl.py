@@ -5,9 +5,8 @@ class RecipeManagerImpl(RecipeManager):
 	"""
 	Implementation of the RecipeManager interface.
 
-	Students should implement all methods defined in the RecipeManager base class.
-	Implement one level at a time, keeping in mind that you will need to refactor
-	to support additional functionality in later levels.
+	The function set is small on purpose. Implement one level at a time and
+	expect to reopen earlier functions to satisfy later requirements.
 	"""
 
 	def __init__(self):
@@ -15,125 +14,95 @@ class RecipeManagerImpl(RecipeManager):
 		# TODO: implement
 		pass
 
-	# Level 1 Methods: Basic Operations
+	# Level 1 Methods: Basic Recipe CRUD
 
-	def add_recipe(self, recipe_name: str) -> str:
-		"""Add a new recipe."""
+	def add_recipe(self, timestamp: int, recipe_name: str) -> str:
+		"""Create a new recipe with a default of 1 serving."""
 		# TODO: implement
 		pass
 
-	def add_ingredient(self, recipe_name: str, ingredient_name: str, quantity: str) -> str:
-		"""Add an ingredient to a recipe or update its quantity."""
+	def add_ingredient(self, timestamp: int, recipe_name: str, ingredient_name: str, quantity: int) -> str:
+		"""Add quantity of an ingredient to a recipe (accumulates if it exists)."""
 		# TODO: implement
 		pass
 
-	def get_recipe(self, recipe_name: str) -> str:
-		"""Get all ingredients in a recipe."""
+	def get_recipe(self, timestamp: int, recipe_name: str) -> str:
+		"""Return the recipe's ingredients sorted by ingredient name ascending."""
 		# TODO: implement
 		pass
 
-	def remove_ingredient(self, recipe_name: str, ingredient_name: str) -> str:
-		"""Remove an ingredient from a recipe."""
+	def remove_ingredient(self, timestamp: int, recipe_name: str, ingredient_name: str) -> str:
+		"""Remove an ingredient from a recipe entirely."""
 		# TODO: implement
 		pass
 
-	def delete_recipe(self, recipe_name: str) -> str:
+	def delete_recipe(self, timestamp: int, recipe_name: str) -> str:
 		"""Delete a recipe."""
 		# TODO: implement
 		pass
 
-	# Level 2 Methods: Nutritional Properties and Queries
+	# Level 2 Methods: Ingredient Properties & Totals
 
-	def add_ingredient_with_props(self, recipe_name: str, ingredient_name: str, quantity: str, calories_per_unit: str, cost_per_unit: str) -> str:
-		"""Add an ingredient with nutritional and cost properties."""
+	def set_ingredient_info(self, timestamp: int, ingredient_name: str, calories_per_unit: int, cost_per_unit: int) -> str:
+		"""Set the global calories-per-unit and cost-per-unit for an ingredient."""
 		# TODO: implement
 		pass
 
-	def get_total_calories(self, recipe_name: str) -> str:
-		"""Calculate total calories for a recipe."""
+	def get_total_calories(self, timestamp: int, recipe_name: str) -> str:
+		"""Return the sum over ingredients of quantity * calories_per_unit."""
 		# TODO: implement
 		pass
 
-	def get_total_cost(self, recipe_name: str) -> str:
-		"""Calculate total cost for a recipe."""
+	def get_total_cost(self, timestamp: int, recipe_name: str) -> str:
+		"""Return the sum over ingredients of quantity * cost_per_unit."""
 		# TODO: implement
 		pass
 
-	def find_recipes_by_ingredient(self, ingredient_name: str) -> str:
-		"""Find all recipes containing a specific ingredient."""
+	def find_recipes_by_ingredient(self, timestamp: int, ingredient_name: str) -> str:
+		"""Return the names of recipes containing the ingredient, sorted ascending."""
 		# TODO: implement
 		pass
 
-	def get_most_expensive_recipes(self, n: str) -> str:
-		"""Get the N most expensive recipes."""
+	# Level 3 Methods: Servings & Scaling
+
+	def set_servings(self, timestamp: int, recipe_name: str, servings: int) -> str:
+		"""Set the number of servings a recipe yields (servings >= 1)."""
 		# TODO: implement
 		pass
 
-	# Level 3 Methods: Recipe Scaling and Tags
-
-	def set_serving_size(self, recipe_name: str, servings: str) -> str:
-		"""Set the serving size for a recipe."""
+	def get_calories_per_serving(self, timestamp: int, recipe_name: str) -> str:
+		"""Return total_calories // servings (floor division)."""
 		# TODO: implement
 		pass
 
-	def scale_recipe(self, recipe_name: str, target_servings: str) -> str:
-		"""Scale a recipe to a different number of servings."""
+	def get_cost_per_serving(self, timestamp: int, recipe_name: str) -> str:
+		"""Return total_cost // servings (floor division)."""
 		# TODO: implement
 		pass
 
-	def get_calories_per_serving(self, recipe_name: str) -> str:
-		"""Get calories per serving for a recipe."""
+	def find_recipes_in_budget(self, timestamp: int, max_cost_per_serving: int) -> str:
+		"""Return the names of recipes whose cost_per_serving is <= max_cost_per_serving."""
 		# TODO: implement
 		pass
 
-	def add_recipe_tag(self, recipe_name: str, tag: str) -> str:
-		"""Add a tag to a recipe."""
+	# Level 4 Methods: Meal Plans
+
+	def create_meal_plan(self, timestamp: int, plan_name: str) -> str:
+		"""Create a new, empty meal plan."""
 		# TODO: implement
 		pass
 
-	def find_recipes_by_tag(self, tag: str) -> str:
-		"""Find all recipes with a specific tag."""
+	def add_recipe_to_plan(self, timestamp: int, plan_name: str, recipe_name: str, servings: int) -> str:
+		"""Record that the plan needs `servings` servings of recipe_name."""
 		# TODO: implement
 		pass
 
-	def find_recipes_in_budget(self, max_cost_per_serving: str) -> str:
-		"""Find all recipes within a cost per serving budget."""
+	def get_plan_shopping_list(self, timestamp: int, plan_name: str) -> str:
+		"""Return aggregated scaled ingredient quantities across all recipes in the plan."""
 		# TODO: implement
 		pass
 
-	# Level 4 Methods: Meal Planning
-
-	def create_meal_plan(self, plan_name: str) -> str:
-		"""Create a new meal plan."""
-		# TODO: implement
-		pass
-
-	def add_recipe_to_meal_plan(self, plan_name: str, recipe_name: str, servings: str) -> str:
-		"""Add a recipe to a meal plan."""
-		# TODO: implement
-		pass
-
-	def get_meal_plan_shopping_list(self, plan_name: str) -> str:
-		"""Get aggregated shopping list for a meal plan."""
-		# TODO: implement
-		pass
-
-	def get_meal_plan_cost(self, plan_name: str) -> str:
-		"""Calculate total cost for a meal plan."""
-		# TODO: implement
-		pass
-
-	def get_meal_plan_calories(self, plan_name: str) -> str:
-		"""Calculate total calories for a meal plan."""
-		# TODO: implement
-		pass
-
-	def suggest_similar_recipes(self, recipe_name: str, n: str) -> str:
-		"""Suggest N similar recipes based on shared ingredients."""
-		# TODO: implement
-		pass
-
-	def optimize_meal_plan(self, plan_name: str, max_calories: str, max_cost: str) -> str:
-		"""Optimize a meal plan by removing recipes to fit within calorie and cost constraints."""
+	def get_plan_cost(self, timestamp: int, plan_name: str) -> str:
+		"""Return the total cost of the plan (sum across recipes of scaled cost)."""
 		# TODO: implement
 		pass

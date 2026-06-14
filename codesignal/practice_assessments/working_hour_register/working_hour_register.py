@@ -1,346 +1,137 @@
 """
 Working Hour Register - Abstract Base Class
 
-This class defines the interface for a working hour tracking system
-with clock in/out, time queries, payroll calculations, and shift management.
+A simplified employee time-tracking system. The set of operations is
+intentionally small: later levels extend the BEHAVIOUR of the same functions
+rather than adding many new ones. Implement one level at a time and expect to
+reopen earlier functions.
+
+All timestamps are plain integer time units and are non-decreasing across
+calls. All durations, hours and pay are integers. Every value is returned as a
+string.
 """
 
 
 class WorkingHourRegister:
-	"""
-	Abstract base class for a working hour register system that manages
-	employee time tracking, payroll calculations, and shift assignments.
-	"""
+	"""Abstract base class for the working hour register."""
 
 	def __init__(self):
-		"""Initialize the working hour register system."""
+		"""Initialize the working hour register."""
 		raise NotImplementedError("Subclasses must implement __init__")
 
-	# Level 1 Methods: Basic Clock In/Out Operations
+	# Level 1 Methods: Basic Clock In/Out
 
 	def clock_in(self, timestamp: int, employee_id: str) -> str:
 		"""
-		Clock in an employee.
-
-		Args:
-		    timestamp (int): Clock in timestamp in milliseconds
-		    employee_id (str): Unique identifier for the employee
+		Clock the employee in at timestamp (auto-creating them on first use).
 
 		Returns:
-		    str: "true" if clocked in successfully, "false" if already clocked in
+		    str: "true" if clocked in, "false" if already clocked in.
 		"""
 		raise NotImplementedError("Subclasses must implement clock_in()")
 
 	def clock_out(self, timestamp: int, employee_id: str) -> str:
 		"""
-		Clock out an employee and calculate hours worked.
-
-		Args:
-		    timestamp (int): Clock out timestamp in milliseconds
-		    employee_id (str): Employee to clock out
+		Clock the employee out, ending the current session.
 
 		Returns:
-		    str: Hours worked in this session as integer (rounded down),
-		         or "" if employee is not clocked in
+		    str: The just-finished session's duration (timestamp - clock_in
+		         time), or "" if the employee was not clocked in.
 		"""
 		raise NotImplementedError("Subclasses must implement clock_out()")
 
-	def get_total_hours(self, employee_id: str) -> str:
+	def is_clocked_in(self, timestamp: int, employee_id: str) -> str:
 		"""
-		Get total hours worked by an employee across all sessions.
-
-		Args:
-		    employee_id (str): Employee to query
+		Report whether the employee is currently clocked in.
 
 		Returns:
-		    str: Total hours worked as integer (rounded down),
-		         or "0" if employee doesn't exist
-		"""
-		raise NotImplementedError("Subclasses must implement get_total_hours()")
-
-	def is_clocked_in(self, employee_id: str) -> str:
-		"""
-		Check if an employee is currently clocked in.
-
-		Args:
-		    employee_id (str): Employee to check
-
-		Returns:
-		    str: "true" if clocked in, "false" otherwise
+		    str: "true" or "false".
 		"""
 		raise NotImplementedError("Subclasses must implement is_clocked_in()")
 
-	def get_employees_working(self, timestamp: int) -> str:
+	def get_total_hours(self, timestamp: int, employee_id: str) -> str:
 		"""
-		Get all employees who are currently clocked in.
-
-		Args:
-		    timestamp (int): Query timestamp
+		Sum of all completed session durations for the employee.
 
 		Returns:
-		    str: Comma-separated list of employee IDs sorted alphabetically,
-		         or "" if no employees are working
+		    str: The total worked time, or "0" if none / unknown employee.
 		"""
-		raise NotImplementedError("Subclasses must implement get_employees_working()")
+		raise NotImplementedError("Subclasses must implement get_total_hours()")
 
-	# Level 2 Methods: Date-Based Queries
+	# Level 2 Methods: Range Queries
+	# (Read-only additions; no earlier function changes behaviour yet.)
 
-	def get_hours_on_date(self, employee_id: str, date: str) -> str:
+	def get_hours_in_range(self, timestamp: int, employee_id: str, start: int, end: int) -> str:
 		"""
-		Get hours worked by an employee on a specific date.
-
-		Args:
-		    employee_id (str): Employee to query
-		    date (str): Date in format "YYYY-MM-DD"
+		Total worked time that falls within the window [start, end), clipping
+		each completed session to the window.
 
 		Returns:
-		    str: Hours worked on that date as integer (rounded down)
-		"""
-		raise NotImplementedError("Subclasses must implement get_hours_on_date()")
-
-	def get_hours_in_range(self, employee_id: str, start_date: str, end_date: str) -> str:
-		"""
-		Get total hours worked by an employee in a date range (inclusive).
-
-		Args:
-		    employee_id (str): Employee to query
-		    start_date (str): Start date in format "YYYY-MM-DD"
-		    end_date (str): End date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: Total hours worked in range as integer (rounded down)
+		    str: The clipped worked time, or "0" if none.
 		"""
 		raise NotImplementedError("Subclasses must implement get_hours_in_range()")
 
-	def get_employees_by_date(self, date: str) -> str:
+	def get_top_employees_by_hours(self, timestamp: int, n: int) -> str:
 		"""
-		Get all employees who worked on a specific date.
-
-		Args:
-		    date (str): Date in format "YYYY-MM-DD"
+		Top n employees by total completed hours (desc), ties by id asc.
 
 		Returns:
-		    str: Comma-separated list of employee IDs sorted alphabetically
-		"""
-		raise NotImplementedError("Subclasses must implement get_employees_by_date()")
-
-	def get_top_employees_by_hours(self, n: int) -> str:
-		"""
-		Get the top N employees by total hours worked.
-
-		Args:
-		    n (int): Number of top employees to return
-
-		Returns:
-		    str: Formatted string "emp1(hours), emp2(hours), ..."
-		         sorted by hours descending, then by employee_id ascending
+		    str: "id1(hours1), id2(hours2), ...", or "" if there are none.
 		"""
 		raise NotImplementedError("Subclasses must implement get_top_employees_by_hours()")
 
-	def get_average_daily_hours(self, employee_id: str) -> str:
-		"""
-		Get average daily hours for an employee.
+	# Level 3 Methods: Breaks & Overtime Pay
+	# (clock_out, get_total_hours and the range queries are reopened so that
+	#  worked time excludes break time.)
 
-		Args:
-		    employee_id (str): Employee to query
+	def set_hourly_rate(self, timestamp: int, employee_id: str, rate: int) -> str:
+		"""
+		Set the employee's hourly pay rate.
 
 		Returns:
-		    str: Average hours per day worked as integer (rounded down)
-		"""
-		raise NotImplementedError("Subclasses must implement get_average_daily_hours()")
-
-	# Level 3 Methods: Payroll and Breaks
-
-	def set_hourly_rate(self, employee_id: str, rate: int) -> str:
-		"""
-		Set hourly rate for an employee.
-
-		Args:
-		    employee_id (str): Employee to set rate for
-		    rate (int): Hourly rate in currency units
-
-		Returns:
-		    str: "true" if rate set successfully
+		    str: "true" if set, "false" if the employee is unknown.
 		"""
 		raise NotImplementedError("Subclasses must implement set_hourly_rate()")
 
-	def calculate_overtime_hours(self, employee_id: str, date: str) -> str:
+	def add_break(self, timestamp: int, employee_id: str, start: int, end: int) -> str:
 		"""
-		Calculate overtime hours for an employee on a specific date.
-		Overtime is any hours worked beyond 8 hours in a day.
-
-		Args:
-		    employee_id (str): Employee to calculate overtime for
-		    date (str): Date in format "YYYY-MM-DD"
+		Record an unpaid break [start, end) that must lie entirely within a
+		single completed session; its duration is subtracted from that
+		session's worked time.
 
 		Returns:
-		    str: Overtime hours as integer (rounded down)
-		"""
-		raise NotImplementedError("Subclasses must implement calculate_overtime_hours()")
-
-	def get_pay_for_date(self, employee_id: str, date: str) -> str:
-		"""
-		Calculate pay for an employee on a specific date.
-		Regular hours (up to 8) paid at hourly rate, overtime at 1.5x rate.
-
-		Args:
-		    employee_id (str): Employee to calculate pay for
-		    date (str): Date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: Total pay as integer (rounded down)
-		"""
-		raise NotImplementedError("Subclasses must implement get_pay_for_date()")
-
-	def add_break(self, start_timestamp: int, end_timestamp: int, employee_id: str) -> str:
-		"""
-		Add a break period for an employee (deducted from hours worked).
-
-		Args:
-		    start_timestamp (int): Break start timestamp in milliseconds
-		    end_timestamp (int): Break end timestamp in milliseconds
-		    employee_id (str): Employee taking the break
-
-		Returns:
-		    str: "true" if break added successfully
+		    str: "true" if the break was applied, otherwise "false".
 		"""
 		raise NotImplementedError("Subclasses must implement add_break()")
 
-	def get_employees_with_overtime(self, date: str) -> str:
+	def get_pay(self, timestamp: int, employee_id: str) -> str:
 		"""
-		Get all employees who worked overtime on a specific date.
-
-		Args:
-		    date (str): Date in format "YYYY-MM-DD"
+		Total pay for all completed worked time, applying the overtime rule.
 
 		Returns:
-		    str: Comma-separated list of employee IDs sorted alphabetically
+		    str: The total pay, or "0" if no rate is set or there are no hours.
 		"""
-		raise NotImplementedError("Subclasses must implement get_employees_with_overtime()")
+		raise NotImplementedError("Subclasses must implement get_pay()")
 
-	def get_total_pay(self, employee_id: str) -> str:
+	# Level 4 Methods: Range Pay & Payroll
+	# (The pay calculation is reopened/shared by get_pay, get_pay_in_range and
+	#  generate_payroll.)
+
+	def get_pay_in_range(self, timestamp: int, employee_id: str, start: int, end: int) -> str:
 		"""
-		Get total pay for an employee across all dates worked.
-
-		Args:
-		    employee_id (str): Employee to calculate total pay for
+		Pay for the worked time within [start, end), applying the overtime rule
+		to the hours in that window.
 
 		Returns:
-		    str: Total pay as integer (rounded down)
+		    str: The pay, or "0" if no rate is set or there are no hours.
 		"""
-		raise NotImplementedError("Subclasses must implement get_total_pay()")
+		raise NotImplementedError("Subclasses must implement get_pay_in_range()")
 
-	# Level 4 Methods: Shift Management and Advanced Analytics
-
-	def create_shift(self, shift_id: str, start_time: str, end_time: str, shift_type: str) -> str:
+	def generate_payroll(self, timestamp: int, start: int, end: int) -> str:
 		"""
-		Create a shift template.
-
-		Args:
-		    shift_id (str): Unique identifier for the shift
-		    start_time (str): Start time in format "HH:MM"
-		    end_time (str): End time in format "HH:MM"
-		    shift_type (str): Type of shift (e.g., "MORNING", "EVENING")
+		Pay for every employee with worked hours in [start, end), sorted by id.
 
 		Returns:
-		    str: "true" if shift created successfully
+		    str: "id1(pay1), id2(pay2), ...", or "" if there are none.
 		"""
-		raise NotImplementedError("Subclasses must implement create_shift()")
-
-	def assign_shift(self, employee_id: str, date: str, shift_id: str) -> str:
-		"""
-		Assign a shift to an employee for a specific date.
-
-		Args:
-		    employee_id (str): Employee to assign shift to
-		    date (str): Date in format "YYYY-MM-DD"
-		    shift_id (str): Shift to assign
-
-		Returns:
-		    str: "true" if shift assigned successfully
-		"""
-		raise NotImplementedError("Subclasses must implement assign_shift()")
-
-	def get_shift_compliance(self, employee_id: str, date: str) -> str:
-		"""
-		Check if employee's actual work hours match their assigned shift.
-
-		Args:
-		    employee_id (str): Employee to check
-		    date (str): Date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: "compliant" if hours match shift, "non-compliant" otherwise
-		"""
-		raise NotImplementedError("Subclasses must implement get_shift_compliance()")
-
-	def generate_payroll_report(self, start_date: str, end_date: str) -> str:
-		"""
-		Generate payroll report for all employees in date range.
-
-		Args:
-		    start_date (str): Start date in format "YYYY-MM-DD"
-		    end_date (str): End date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: Formatted string "emp1(pay), emp2(pay), ..."
-		         sorted by employee_id ascending
-		"""
-		raise NotImplementedError("Subclasses must implement generate_payroll_report()")
-
-	def get_shift_statistics(self, shift_type: str, start_date: str, end_date: str) -> str:
-		"""
-		Get statistics for a shift type in a date range.
-
-		Args:
-		    shift_type (str): Type of shift to analyze
-		    start_date (str): Start date in format "YYYY-MM-DD"
-		    end_date (str): End date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: "total_hours:H,employees:E,avg_hours:A"
-		         where avg_hours is rounded down to integer
-		"""
-		raise NotImplementedError("Subclasses must implement get_shift_statistics()")
-
-	def find_uncovered_shifts(self, date: str) -> str:
-		"""
-		Find shifts that were assigned but employee didn't work.
-
-		Args:
-		    date (str): Date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: Formatted string "emp1:shift1, emp2:shift2, ..."
-		         sorted by employee_id ascending
-		"""
-		raise NotImplementedError("Subclasses must implement find_uncovered_shifts()")
-
-	def export_timesheet(self, employee_id: str, start_date: str, end_date: str) -> str:
-		"""
-		Export timesheet for an employee showing daily hours.
-
-		Args:
-		    employee_id (str): Employee to export timesheet for
-		    start_date (str): Start date in format "YYYY-MM-DD"
-		    end_date (str): End date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: Formatted string "date1(hours), date2(hours), ..."
-		         sorted by date ascending
-		"""
-		raise NotImplementedError("Subclasses must implement export_timesheet()")
-
-	def calculate_weekly_overtime(self, employee_id: str, week_start_date: str) -> str:
-		"""
-		Calculate weekly overtime for an employee.
-		Weekly overtime is any hours worked beyond 40 hours in the week.
-
-		Args:
-		    employee_id (str): Employee to calculate overtime for
-		    week_start_date (str): Week start date in format "YYYY-MM-DD"
-
-		Returns:
-		    str: Weekly overtime hours as integer (rounded down)
-		"""
-		raise NotImplementedError("Subclasses must implement calculate_weekly_overtime()")
+		raise NotImplementedError("Subclasses must implement generate_payroll()")

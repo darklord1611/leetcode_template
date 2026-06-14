@@ -14,110 +14,71 @@ from timeout_decorator import timeout
 
 class Level1Tests(unittest.TestCase):
 	"""
-	Level 1 tests for In-Memory Database - Basic Field Operations
+	Level 1 tests for In-Memory Database - Field Operations
 
-	Tests cover: SET_FIELD, GET_FIELD, GET, DELETE_FIELD
-	All tests have a 0.4 second timeout.
+	Tests cover: set_field, get_field, delete_field, get_record
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh InMemoryDatabase instance for each test."""
 		self.db = InMemoryDatabaseImpl()
 
 	@timeout(0.4)
-	def test_level_1_case_01_set_and_get_single_field(self):
-		"""Test setting and retrieving a single field."""
-		self.assertEqual(self.db.set_field("user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.get_field("user1", "name"), "Alice")
+	def test_level_1_case_01_set_field_returns_true(self):
+		self.assertEqual(self.db.set_field(1, "a", "f1", "v1"), "true")
 
 	@timeout(0.4)
-	def test_level_1_case_02_set_multiple_fields_same_key(self):
-		"""Test setting multiple fields for the same key."""
-		self.assertEqual(self.db.set_field("user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.set_field("user1", "age", "30"), "30")
-		self.assertEqual(self.db.set_field("user1", "city", "NYC"), "NYC")
+	def test_level_1_case_02_get_field(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.assertEqual(self.db.get_field(2, "a", "f1"), "v1")
 
 	@timeout(0.4)
-	def test_level_1_case_03_get_nonexistent_key(self):
-		"""Test getting field from non-existent key returns empty string."""
-		self.db.set_field("user1", "name", "Alice")
-		result = self.db.get_field("user3", "name")
-		self.assertEqual(result, "")
+	def test_level_1_case_03_get_missing_key(self):
+		self.assertEqual(self.db.get_field(1, "missing", "f1"), "")
 
 	@timeout(0.4)
-	def test_level_1_case_04_get_all_fields(self):
-		"""Test GET operation returns all fields alphabetically."""
-		self.db.set_field("user1", "name", "Alice")
-		self.db.set_field("user1", "age", "30")
-		self.db.set_field("user1", "city", "NYC")
-		result = self.db.get("user1")
-		self.assertEqual(result, "age(30), city(NYC), name(Alice)")
+	def test_level_1_case_04_get_missing_field(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.assertEqual(self.db.get_field(2, "a", "f2"), "")
 
 	@timeout(0.4)
-	def test_level_1_case_05_get_multiple_keys(self):
-		"""Test GET on multiple different keys."""
-		self.db.set_field("user1", "name", "Alice")
-		self.db.set_field("user1", "age", "30")
-		self.db.set_field("user1", "city", "NYC")
-		self.db.set_field("user2", "name", "Bob")
-		self.db.set_field("user2", "age", "25")
-
-		self.assertEqual(self.db.get("user1"), "age(30), city(NYC), name(Alice)")
-		self.assertEqual(self.db.get("user2"), "age(25), name(Bob)")
+	def test_level_1_case_05_overwrite_field(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.db.set_field(2, "a", "f1", "v2")
+		self.assertEqual(self.db.get_field(3, "a", "f1"), "v2")
 
 	@timeout(0.4)
-	def test_level_1_case_06_delete_field_success(self):
-		"""Test deleting an existing field returns true."""
-		self.db.set_field("user1", "name", "Alice")
-		self.db.set_field("user1", "age", "30")
-		result = self.db.delete_field("user1", "age")
-		self.assertEqual(result, "true")
+	def test_level_1_case_06_delete_field(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.assertEqual(self.db.delete_field(2, "a", "f1"), "true")
+		self.assertEqual(self.db.get_field(3, "a", "f1"), "")
 
 	@timeout(0.4)
-	def test_level_1_case_07_delete_field_and_verify(self):
-		"""Test that deleted field is no longer in GET result."""
-		self.db.set_field("user1", "name", "Alice")
-		self.db.set_field("user1", "age", "30")
-		self.db.set_field("user1", "city", "NYC")
-		self.db.delete_field("user1", "age")
-		result = self.db.get("user1")
-		self.assertEqual(result, "city(NYC), name(Alice)")
+	def test_level_1_case_07_delete_missing_field(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.assertEqual(self.db.delete_field(2, "a", "nope"), "false")
 
 	@timeout(0.4)
-	def test_level_1_case_08_delete_nonexistent_field(self):
-		"""Test deleting non-existent field returns false."""
-		self.db.set_field("user1", "name", "Alice")
-		result = self.db.delete_field("user3", "name")
-		self.assertEqual(result, "false")
+	def test_level_1_case_08_delete_missing_key(self):
+		self.assertEqual(self.db.delete_field(1, "missing", "f1"), "false")
 
 	@timeout(0.4)
-	def test_level_1_case_09_get_deleted_field(self):
-		"""Test getting a deleted field returns empty string."""
-		self.db.set_field("user1", "name", "Alice")
-		self.db.set_field("user1", "age", "30")
-		self.db.delete_field("user1", "age")
-		result = self.db.get_field("user1", "age")
-		self.assertEqual(result, "")
+	def test_level_1_case_09_get_record_sorted(self):
+		self.db.set_field(1, "a", "b", "2")
+		self.db.set_field(2, "a", "a", "1")
+		self.db.set_field(3, "a", "c", "3")
+		self.assertEqual(self.db.get_record(4, "a"), "a=1, b=2, c=3")
 
 	@timeout(0.4)
-	def test_level_1_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_1."""
-		self.assertEqual(self.db.set_field("user1", "name", "Alice"), "Alice")
-		self.assertEqual(self.db.set_field("user1", "age", "30"), "30")
-		self.assertEqual(self.db.set_field("user1", "city", "NYC"), "NYC")
-		self.assertEqual(self.db.set_field("user2", "name", "Bob"), "Bob")
-		self.assertEqual(self.db.set_field("user2", "age", "25"), "25")
-		self.assertEqual(self.db.get_field("user1", "name"), "Alice")
-		self.assertEqual(self.db.get_field("user1", "age"), "30")
-		self.assertEqual(self.db.get_field("user3", "name"), "")
-		self.assertEqual(self.db.get("user1"), "age(30), city(NYC), name(Alice)")
-		self.assertEqual(self.db.get("user2"), "age(25), name(Bob)")
-		self.assertEqual(self.db.delete_field("user1", "age"), "true")
-		self.assertEqual(self.db.get("user1"), "city(NYC), name(Alice)")
-		self.assertEqual(self.db.delete_field("user3", "name"), "false")
-		self.assertEqual(self.db.get_field("user1", "age"), "")
+	def test_level_1_case_10_get_record_missing_key(self):
+		self.assertEqual(self.db.get_record(1, "missing"), "")
+
+	@timeout(0.4)
+	def test_level_1_case_11_record_removed_when_empty(self):
+		self.db.set_field(1, "a", "f1", "v1")
+		self.db.delete_field(2, "a", "f1")
+		self.assertEqual(self.db.get_record(3, "a"), "")
 
 
 if __name__ == "__main__":

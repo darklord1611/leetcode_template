@@ -16,96 +16,75 @@ class Level1Tests(unittest.TestCase):
 	"""
 	Level 1 tests for Banking System - Basic Operations
 
-	Tests cover: CREATE_ACCOUNT, DEPOSIT, WITHDRAW, TRANSFER
-	All tests have a 0.4 second timeout.
+	Tests cover: CREATE_ACCOUNT, DEPOSIT, PAY, TRANSFER
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh BankingSystem instance for each test."""
 		self.bank = BankingSystemImpl()
 
 	@timeout(0.4)
 	def test_level_1_case_01_create_account(self):
-		"""Test creating a new account."""
-		result = self.bank.create_account(1, "account1")
-		self.assertEqual(result, "true")
+		self.assertEqual(self.bank.create_account(1, "a"), "true")
 
 	@timeout(0.4)
-	def test_level_1_case_02_create_duplicate_account(self):
-		"""Test that duplicate account creation returns false."""
-		self.bank.create_account(1, "account1")
-		result = self.bank.create_account(2, "account1")
-		self.assertEqual(result, "false")
+	def test_level_1_case_02_create_duplicate(self):
+		self.bank.create_account(1, "a")
+		self.assertEqual(self.bank.create_account(2, "a"), "false")
 
 	@timeout(0.4)
-	def test_level_1_case_03_deposit_to_existing_account(self):
-		"""Test depositing money to an existing account."""
-		self.bank.create_account(1, "account1")
-		result = self.bank.deposit(2, "account1", 1000)
-		self.assertEqual(result, "1000")
+	def test_level_1_case_03_deposit(self):
+		self.bank.create_account(1, "a")
+		self.assertEqual(self.bank.deposit(2, "a", 1000), "1000")
 
 	@timeout(0.4)
-	def test_level_1_case_04_deposit_to_nonexistent_account(self):
-		"""Test depositing to non-existent account returns empty string."""
-		result = self.bank.deposit(1, "nonexistent", 100)
-		self.assertEqual(result, "")
+	def test_level_1_case_04_deposit_missing(self):
+		self.assertEqual(self.bank.deposit(1, "missing", 100), "")
 
 	@timeout(0.4)
-	def test_level_1_case_05_withdraw_with_sufficient_funds(self):
-		"""Test withdrawal with sufficient balance."""
-		self.bank.create_account(1, "account1")
-		self.bank.deposit(2, "account1", 1000)
-		result = self.bank.withdraw(3, "account1", 200)
-		self.assertEqual(result, "800")
+	def test_level_1_case_05_pay(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(2, "a", 1000)
+		self.assertEqual(self.bank.pay(3, "a", 300), "700")
 
 	@timeout(0.4)
-	def test_level_1_case_06_withdraw_with_insufficient_funds(self):
-		"""Test withdrawal with insufficient balance returns empty string."""
-		self.bank.create_account(1, "account1")
-		self.bank.deposit(2, "account1", 500)
-		result = self.bank.withdraw(3, "account1", 600)
-		self.assertEqual(result, "")
+	def test_level_1_case_06_pay_insufficient(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(2, "a", 700)
+		self.assertEqual(self.bank.pay(3, "a", 1000), "")
 
 	@timeout(0.4)
-	def test_level_1_case_07_transfer_with_sufficient_funds(self):
-		"""Test transfer between accounts with sufficient balance."""
-		self.bank.create_account(1, "account1")
-		self.bank.create_account(2, "account2")
-		self.bank.deposit(3, "account1", 1000)
-		result = self.bank.transfer(4, "account1", "account2", 300)
-		self.assertEqual(result, "700")
+	def test_level_1_case_07_pay_missing(self):
+		self.assertEqual(self.bank.pay(1, "missing", 100), "")
 
 	@timeout(0.4)
-	def test_level_1_case_08_transfer_with_insufficient_funds(self):
-		"""Test transfer with insufficient balance returns empty string."""
-		self.bank.create_account(1, "account1")
-		self.bank.create_account(2, "account2")
-		self.bank.deposit(3, "account1", 200)
-		result = self.bank.transfer(4, "account1", "account2", 300)
-		self.assertEqual(result, "")
+	def test_level_1_case_08_transfer(self):
+		self.bank.create_account(1, "a")
+		self.bank.create_account(1, "b")
+		self.bank.deposit(2, "a", 1000)
+		self.assertEqual(self.bank.transfer(3, "a", "b", 400), "600")
+		# b should now hold 400
+		self.assertEqual(self.bank.pay(4, "b", 400), "0")
 
 	@timeout(0.4)
-	def test_level_1_case_09_multiple_deposits(self):
-		"""Test multiple deposits accumulate correctly."""
-		self.bank.create_account(1, "account1")
-		self.assertEqual(self.bank.deposit(2, "account1", 100), "100")
-		self.assertEqual(self.bank.deposit(3, "account1", 200), "300")
-		self.assertEqual(self.bank.deposit(4, "account1", 150), "450")
+	def test_level_1_case_09_transfer_missing_target(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(2, "a", 1000)
+		self.assertEqual(self.bank.transfer(3, "a", "missing", 400), "")
 
 	@timeout(0.4)
-	def test_level_1_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_1."""
-		self.assertEqual(self.bank.create_account(1, "account1"), "true")
-		self.assertEqual(self.bank.create_account(2, "account2"), "true")
-		self.assertEqual(self.bank.create_account(3, "account1"), "false")
-		self.assertEqual(self.bank.deposit(4, "account1", 1000), "1000")
-		self.assertEqual(self.bank.deposit(5, "account2", 500), "500")
-		self.assertEqual(self.bank.withdraw(6, "account1", 200), "800")
-		self.assertEqual(self.bank.withdraw(7, "account2", 600), "")
-		self.assertEqual(self.bank.transfer(8, "account1", "account2", 300), "500")
-		self.assertEqual(self.bank.deposit(9, "account3", 100), "")
+	def test_level_1_case_10_transfer_same_account(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(2, "a", 1000)
+		self.assertEqual(self.bank.transfer(3, "a", "a", 100), "")
+
+	@timeout(0.4)
+	def test_level_1_case_11_transfer_insufficient(self):
+		self.bank.create_account(1, "a")
+		self.bank.create_account(1, "b")
+		self.bank.deposit(2, "a", 100)
+		self.assertEqual(self.bank.transfer(3, "a", "b", 500), "")
 
 
 if __name__ == "__main__":

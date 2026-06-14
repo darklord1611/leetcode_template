@@ -1,16 +1,14 @@
 """
 Banking System - Abstract Base Class
 
-This class defines the interface for a simplified banking system
-with account management, transactions, scheduled payments, and analytics.
+A simplified banking system. The set of operations is intentionally small:
+later levels extend the BEHAVIOUR of the same functions rather than adding many
+new ones. Implement one level at a time and expect to reopen earlier functions.
 """
 
 
 class BankingSystem:
-	"""
-	Abstract base class for a banking system that manages accounts,
-	transactions, scheduled payments, and provides various query operations.
-	"""
+	"""Abstract base class for the banking system."""
 
 	def __init__(self):
 		"""Initialize the banking system."""
@@ -20,186 +18,92 @@ class BankingSystem:
 
 	def create_account(self, timestamp: int, account_id: str) -> str:
 		"""
-		Create a new account with zero balance.
-
-		Args:
-		    timestamp (int): Transaction timestamp
-		    account_id (str): Unique identifier for the account
+		Create a new account with balance 0.
 
 		Returns:
-		    str: "true" if account created successfully, "false" if account already exists
+		    str: "true" if created, "false" if the account already exists.
 		"""
 		raise NotImplementedError("Subclasses must implement create_account()")
 
 	def deposit(self, timestamp: int, account_id: str, amount: int) -> str:
 		"""
-		Deposit money into an account.
-
-		Args:
-		    timestamp (int): Transaction timestamp
-		    account_id (str): Account to deposit into
-		    amount (int): Amount to deposit
+		Add amount to the account's balance.
 
 		Returns:
-		    str: New balance as string if successful, "" if account doesn't exist
+		    str: The new balance, or "" if the account does not exist.
 		"""
 		raise NotImplementedError("Subclasses must implement deposit()")
 
-	def withdraw(self, timestamp: int, account_id: str, amount: int) -> str:
+	def pay(self, timestamp: int, account_id: str, amount: int) -> str:
 		"""
-		Withdraw money from an account.
-
-		Args:
-		    timestamp (int): Transaction timestamp
-		    account_id (str): Account to withdraw from
-		    amount (int): Amount to withdraw
+		Withdraw amount from the account (an outgoing payment).
 
 		Returns:
-		    str: New balance as string if successful,
-		         "" if account doesn't exist or insufficient funds
+		    str: The new balance, or "" if the account is missing or underfunded.
 		"""
-		raise NotImplementedError("Subclasses must implement withdraw()")
+		raise NotImplementedError("Subclasses must implement pay()")
 
 	def transfer(self, timestamp: int, source_account_id: str, target_account_id: str, amount: int) -> str:
 		"""
-		Transfer money from one account to another.
-
-		Args:
-		    timestamp (int): Transaction timestamp
-		    source_account_id (str): Account to transfer from
-		    target_account_id (str): Account to transfer to
-		    amount (int): Amount to transfer
+		Move amount from source to target.
 
 		Returns:
-		    str: Source account's new balance as string if successful,
-		         "" if either account doesn't exist or insufficient funds
+		    str: The source account's new balance, or "" on failure
+		         (missing account, same account, or insufficient funds).
 		"""
 		raise NotImplementedError("Subclasses must implement transfer()")
 
-	# Level 2 Methods: Query Operations
+	# Level 2 Methods: Outgoing Totals & Ranking
+	# (PAY and TRANSFER must be reopened to accumulate outgoing totals.)
 
 	def top_spenders(self, timestamp: int, n: int) -> str:
 		"""
-		Get the top N accounts by total amount spent (withdrawals + transfers out).
-
-		Args:
-		    timestamp (int): Query timestamp
-		    n (int): Number of top spenders to return
+		Return the top n accounts by outgoing total.
 
 		Returns:
-		    str: Formatted string "account1(amount), account2(amount), ..."
-		         sorted by amount descending, then by account_id ascending
+		    str: "id1(total1), id2(total2), ..." (desc by total, ties by id asc).
 		"""
 		raise NotImplementedError("Subclasses must implement top_spenders()")
 
-	def get_payment_history(self, timestamp: int, account_id: str, n: int) -> str:
-		"""
-		Get the last N transactions for an account.
+	# Level 3 Methods: Scheduled Payments
+	# (All transaction operations must process due scheduled payments first.)
 
-		Args:
-		    timestamp (int): Query timestamp
-		    account_id (str): Account to query
-		    n (int): Number of transactions to return
+	def schedule_payment(self, timestamp: int, account_id: str, amount: int, delay: int) -> str:
+		"""
+		Schedule a payment from account_id to execute at timestamp + delay.
 
 		Returns:
-		    str: Formatted string "OPERATION(amount), OPERATION(amount), ..."
-		         where operations are: DEPOSIT, WITHDRAW, TRANSFER_IN, TRANSFER_OUT
-		         in reverse chronological order (most recent first)
-		"""
-		raise NotImplementedError("Subclasses must implement get_payment_history()")
-
-	# Level 3 Methods: Scheduled Payments and Acceptance
-
-	def schedule_payment(self, timestamp: int, account_id: str, amount: int, payment_type: str, delay: int) -> str:
-		"""
-		Schedule a payment to execute after a delay.
-
-		Args:
-		    timestamp (int): Scheduling timestamp
-		    account_id (str): Account for the payment
-		    amount (int): Amount for the payment
-		    payment_type (str): Type of payment ("DEPOSIT" or "WITHDRAW")
-		    delay (int): Milliseconds to wait before executing
-
-		Returns:
-		    str: "true" if scheduled successfully
+		    str: A payment id "paymentN", or "" if the account does not exist.
 		"""
 		raise NotImplementedError("Subclasses must implement schedule_payment()")
 
-	def accept_payment(self, timestamp: int, account_id: str, payment_id: str) -> str:
+	def cancel_payment(self, timestamp: int, account_id: str, payment_id: str) -> str:
 		"""
-		Accept a payment that requires 2FA confirmation.
-
-		Large transactions (amount > 1000) require acceptance via payment_id.
-
-		Args:
-		    timestamp (int): Acceptance timestamp
-		    account_id (str): Account for the payment
-		    payment_id (str): Payment identifier (e.g., "payment_1")
+		Cancel a not-yet-executed scheduled payment belonging to account_id.
 
 		Returns:
-		    str: New account balance as string after accepting the payment
+		    str: "true" if cancelled, otherwise "false".
 		"""
-		raise NotImplementedError("Subclasses must implement accept_payment()")
+		raise NotImplementedError("Subclasses must implement cancel_payment()")
 
-	def top_activity(self, timestamp: int, n: int) -> str:
+	# Level 4 Methods: Merging Accounts & Historical Balance
+
+	def merge_accounts(self, timestamp: int, account_id_1: str, account_id_2: str) -> str:
 		"""
-		Get the top N accounts by number of transactions.
-
-		Args:
-		    timestamp (int): Query timestamp
-		    n (int): Number of accounts to return
+		Merge account_id_2 into account_id_1 (balances, outgoing totals, and
+		pending scheduled payments combine); account_id_2 ceases to exist.
 
 		Returns:
-		    str: Formatted string "account1(count), account2(count), ..."
-		         sorted by count descending, then by account_id ascending
-		"""
-		raise NotImplementedError("Subclasses must implement top_activity()")
-
-	# Level 4 Methods: Merge Accounts and Statistics
-
-	def get_bank_statistics(self, timestamp: int) -> str:
-		"""
-		Get overall bank statistics.
-
-		Args:
-		    timestamp (int): Query timestamp
-
-		Returns:
-		    str: "total_accounts:N,total_balance:B,average_balance:A"
-		         where average_balance is rounded down to integer
-		"""
-		raise NotImplementedError("Subclasses must implement get_bank_statistics()")
-
-	def merge_accounts(self, timestamp: int, account_id1: str, account_id2: str) -> str:
-		"""
-		Merge two accounts, combining their balances and histories.
-
-		The second account is merged into the first, and the second account is removed.
-
-		Args:
-		    timestamp (int): Merge timestamp
-		    account_id1 (str): First account (will receive merged balance)
-		    account_id2 (str): Second account (will be removed)
-
-		Returns:
-		    str: New balance of account_id1 as string after merge
+		    str: "true" on success, "false" if ids are equal or either is missing.
 		"""
 		raise NotImplementedError("Subclasses must implement merge_accounts()")
 
-	def cashback(self, timestamp: int, account_id: str, percentage: int) -> str:
+	def get_balance(self, timestamp: int, account_id: str, time_at: int) -> str:
 		"""
-		Apply cashback rewards to an account.
-
-		Calculates cashback as percentage of total spending (withdrawals + transfers out)
-		and adds it to the account balance.
-
-		Args:
-		    timestamp (int): Cashback timestamp
-		    account_id (str): Account to apply cashback to
-		    percentage (int): Cashback percentage (e.g., 10 for 10%)
+		Return the account's balance as it was at the historical time time_at.
 
 		Returns:
-		    str: Cashback amount as string (not the new balance, just the cashback)
+		    str: The historical balance, or "" if the account did not exist at
+		         time_at (or had been merged away by then).
 		"""
-		raise NotImplementedError("Subclasses must implement cashback()")
+		raise NotImplementedError("Subclasses must implement get_balance()")

@@ -14,107 +14,75 @@ from timeout_decorator import timeout
 
 class Level2Tests(unittest.TestCase):
 	"""
-	Level 2 tests for File Storage - Search and Query Operations
+	Level 2 tests for File Storage - Search
 
-	Tests cover: FILE_SEARCH with prefix matching and size sorting
-	All tests have a 0.4 second timeout.
+	Tests cover: FILE_SEARCH
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh FileStorage instance for each test."""
 		self.storage = FileStorageImpl()
 
 	@timeout(0.4)
-	def test_level_2_case_01_search_by_prefix(self):
-		"""Test searching files by prefix, sorted by size descending."""
-		self.storage.file_upload("Foo.txt", "100kb")
-		self.storage.file_upload("Bar.csv", "200kb")
-		self.storage.file_upload("Baz.pdf", "300kb")
-		result = self.storage.file_search("Ba")
-		self.assertEqual(result, "found [Baz.pdf, Bar.csv]")
+	def test_level_2_case_01_search_no_match(self):
+		self.storage.file_upload(1, "a.txt", 100)
+		self.assertEqual(self.storage.file_search(2, "zzz"), "")
 
 	@timeout(0.4)
-	def test_level_2_case_02_search_single_match(self):
-		"""Test searching with a single matching file."""
-		self.storage.file_upload("Foo.txt", "100kb")
-		self.storage.file_upload("Bar.csv", "200kb")
-		result = self.storage.file_search("Foo")
-		self.assertEqual(result, "found [Foo.txt]")
+	def test_level_2_case_02_search_empty_store(self):
+		self.assertEqual(self.storage.file_search(1, "doc"), "")
 
 	@timeout(0.4)
-	def test_level_2_case_03_search_no_matches(self):
-		"""Test searching with no matching files."""
-		self.storage.file_upload("Foo.txt", "100kb")
-		self.storage.file_upload("Bar.csv", "200kb")
-		result = self.storage.file_search("Xyz")
-		self.assertEqual(result, "found []")
+	def test_level_2_case_03_search_single_match(self):
+		self.storage.file_upload(1, "doc_a", 100)
+		self.assertEqual(self.storage.file_search(2, "doc"), "doc_a")
 
 	@timeout(0.4)
-	def test_level_2_case_04_search_all_files(self):
-		"""Test searching with empty prefix matches all files."""
-		self.storage.file_upload("Small.txt", "50kb")
-		self.storage.file_upload("Medium.txt", "100kb")
-		self.storage.file_upload("Large.txt", "200kb")
-		result = self.storage.file_search("")
-		self.assertEqual(result, "found [Large.txt, Medium.txt, Small.txt]")
+	def test_level_2_case_04_search_size_desc(self):
+		self.storage.file_upload(1, "doc_a", 100)
+		self.storage.file_upload(1, "doc_b", 300)
+		self.storage.file_upload(1, "doc_c", 200)
+		self.assertEqual(self.storage.file_search(2, "doc"), "doc_b, doc_c, doc_a")
 
 	@timeout(0.4)
-	def test_level_2_case_05_search_size_ordering(self):
-		"""Test that search results are ordered by size (descending)."""
-		self.storage.file_upload("File1.txt", "300kb")
-		self.storage.file_upload("File2.txt", "100kb")
-		self.storage.file_upload("File3.txt", "200kb")
-		result = self.storage.file_search("File")
-		self.assertEqual(result, "found [File1.txt, File3.txt, File2.txt]")
+	def test_level_2_case_05_search_tie_name_asc(self):
+		self.storage.file_upload(1, "doc_y", 100)
+		self.storage.file_upload(1, "doc_x", 100)
+		self.assertEqual(self.storage.file_search(2, "doc"), "doc_x, doc_y")
 
 	@timeout(0.4)
-	def test_level_2_case_06_search_with_copies(self):
-		"""Test searching includes copied files."""
-		self.storage.file_upload("Original.txt", "150kb")
-		self.storage.file_copy("Original.txt", "Copy.txt")
-		result = self.storage.file_search("C")
-		self.assertEqual(result, "found [Copy.txt]")
+	def test_level_2_case_06_search_prefix_filters(self):
+		self.storage.file_upload(1, "doc_a", 500)
+		self.storage.file_upload(1, "img_a", 900)
+		self.assertEqual(self.storage.file_search(2, "doc"), "doc_a")
 
 	@timeout(0.4)
-	def test_level_2_case_07_search_case_sensitive(self):
-		"""Test that search is case-sensitive."""
-		self.storage.file_upload("apple.txt", "100kb")
-		self.storage.file_upload("Apple.txt", "200kb")
-		result = self.storage.file_search("a")
-		self.assertEqual(result, "found [apple.txt]")
+	def test_level_2_case_07_search_empty_prefix_all(self):
+		self.storage.file_upload(1, "a", 100)
+		self.storage.file_upload(1, "b", 200)
+		self.assertEqual(self.storage.file_search(2, ""), "b, a")
 
 	@timeout(0.4)
-	def test_level_2_case_08_search_multiple_prefixes(self):
-		"""Test searching with different prefixes."""
-		self.storage.file_upload("Alpha.txt", "100kb")
-		self.storage.file_upload("Beta.txt", "200kb")
-		self.storage.file_upload("Gamma.txt", "300kb")
-		self.assertEqual(self.storage.file_search("A"), "found [Alpha.txt]")
-		self.assertEqual(self.storage.file_search("B"), "found [Beta.txt]")
-		self.assertEqual(self.storage.file_search("G"), "found [Gamma.txt]")
+	def test_level_2_case_08_search_top_10_limit(self):
+		for i in range(15):
+			self.storage.file_upload(1, "f" + str(i).zfill(2), i + 1)
+		# Largest sizes are f14..f05 (10 files), size desc.
+		expected = ", ".join("f" + str(i).zfill(2) for i in range(14, 4, -1))
+		self.assertEqual(self.storage.file_search(2, "f"), expected)
 
 	@timeout(0.4)
-	def test_level_2_case_09_search_same_size_files(self):
-		"""Test searching with files of the same size."""
-		self.storage.file_upload("File1.txt", "100kb")
-		self.storage.file_upload("File2.txt", "100kb")
-		self.storage.file_upload("File3.txt", "100kb")
-		result = self.storage.file_search("File")
-		# Files with same size should maintain some consistent order
-		self.assertIn("File1.txt", result)
-		self.assertIn("File2.txt", result)
-		self.assertIn("File3.txt", result)
+	def test_level_2_case_09_search_after_copy(self):
+		self.storage.file_upload(1, "doc_a", 100)
+		self.storage.file_copy(2, "doc_a", "doc_b")
+		self.assertEqual(self.storage.file_search(3, "doc"), "doc_a, doc_b")
 
 	@timeout(0.4)
-	def test_level_2_case_10_search_after_operations(self):
-		"""Test searching after various operations."""
-		self.storage.file_upload("Data1.csv", "500kb")
-		self.storage.file_upload("Data2.csv", "300kb")
-		self.storage.file_copy("Data1.csv", "Data3.csv")
-		result = self.storage.file_search("Data")
-		self.assertEqual(result, "found [Data1.csv, Data3.csv, Data2.csv]")
+	def test_level_2_case_10_search_mixed_ties(self):
+		self.storage.file_upload(1, "doc_a", 200)
+		self.storage.file_upload(1, "doc_c", 200)
+		self.storage.file_upload(1, "doc_b", 300)
+		self.assertEqual(self.storage.file_search(2, "doc"), "doc_b, doc_a, doc_c")
 
 
 if __name__ == "__main__":

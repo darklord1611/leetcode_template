@@ -14,138 +14,99 @@ from timeout_decorator import timeout
 
 class Level3Tests(unittest.TestCase):
 	"""
-	Level 3 tests for Banking System - Scheduled Payments and 2FA
+	Level 3 tests for Banking System - Scheduled Payments
 
-	Tests cover: SCHEDULE_PAYMENT, ACCEPT_PAYMENT, TOP_ACTIVITY
-	All tests have a 0.4 second timeout.
+	Tests cover: SCHEDULE_PAYMENT, CANCEL_PAYMENT, and due-payment processing
+	woven into DEPOSIT / PAY / TRANSFER / TOP_SPENDERS.
 	"""
 
 	failureException = Exception
 
 	def setUp(self):
-		"""Create a fresh BankingSystem instance for each test."""
 		self.bank = BankingSystemImpl()
 
 	@timeout(0.4)
-	def test_level_3_case_01_schedule_payment(self):
-		"""Test scheduling a payment."""
-		self.bank.create_account(1000, "account1")
-		self.bank.deposit(1000, "account1", 5000)
-		result = self.bank.schedule_payment(1000, "account1", 500, "DEPOSIT", 2000)
-		self.assertEqual(result, "true")
+	def test_level_3_case_01_schedule_returns_id(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.assertEqual(self.bank.schedule_payment(1, "a", 100, 10), "payment1")
 
 	@timeout(0.4)
-	def test_level_3_case_02_scheduled_payment_executes(self):
-		"""Test that scheduled payment executes at correct time."""
-		self.bank.create_account(1000, "account1")
-		self.bank.deposit(1000, "account1", 5000)
-		self.bank.schedule_payment(1000, "account1", 500, "DEPOSIT", 2000)
-		# Before scheduled time (at 1500, scheduled for 3000)
-		result1 = self.bank.withdraw(1500, "account1", 200)
-		self.assertEqual(result1, "4800")
-		# After scheduled time (at 3500, scheduled executed at 3000)
-		result2 = self.bank.deposit(3500, "account1", 100)
-		# Balance should be: 4800 + 500 (scheduled) + 100 = 5400
-		self.assertEqual(result2, "5400")
+	def test_level_3_case_02_schedule_missing_account(self):
+		self.assertEqual(self.bank.schedule_payment(1, "missing", 100, 10), "")
 
 	@timeout(0.4)
-	def test_level_3_case_03_large_withdrawal_requires_acceptance(self):
-		"""Test that withdrawals > 1000 require acceptance."""
-		self.bank.create_account(1000, "account1")
-		self.bank.deposit(1000, "account1", 5000)
-		result = self.bank.withdraw(2000, "account1", 1500)
-		# Should return payment_id instead of balance
-		self.assertEqual(result, "payment_1")
+	def test_level_3_case_03_executes_at_due_time(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.bank.schedule_payment(2, "a", 300, 10)  # executes at 12
+		self.assertEqual(self.bank.deposit(11, "a", 0), "1000")  # not yet due
+		self.assertEqual(self.bank.deposit(12, "a", 0), "700")   # due now
 
 	@timeout(0.4)
-	def test_level_3_case_04_accept_payment(self):
-		"""Test accepting a payment."""
-		self.bank.create_account(1000, "account1")
-		self.bank.deposit(1000, "account1", 5000)
-		payment_id = self.bank.withdraw(2000, "account1", 1500)
-		result = self.bank.accept_payment(2500, "account1", payment_id)
-		self.assertEqual(result, "3500")
+	def test_level_3_case_04_execution_counts_outgoing(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.bank.schedule_payment(2, "a", 400, 5)  # executes at 7
+		self.assertEqual(self.bank.top_spenders(7, 1), "a(400)")
 
 	@timeout(0.4)
-	def test_level_3_case_05_large_transfer_requires_acceptance(self):
-		"""Test that transfers > 1000 require acceptance."""
-		self.bank.create_account(1000, "account1")
-		self.bank.create_account(1000, "account2")
-		self.bank.deposit(1000, "account1", 5000)
-		result = self.bank.transfer(2000, "account1", "account2", 1200)
-		# Should return payment_id
-		self.assertEqual(result, "payment_1")
+	def test_level_3_case_05_cancel_before_execution(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.bank.schedule_payment(2, "a", 300, 10)  # executes at 12
+		self.assertEqual(self.bank.cancel_payment(3, "a", "payment1"), "true")
+		self.assertEqual(self.bank.deposit(12, "a", 0), "1000")
 
 	@timeout(0.4)
-	def test_level_3_case_06_accept_transfer_payment(self):
-		"""Test accepting a transfer payment."""
-		self.bank.create_account(1000, "account1")
-		self.bank.create_account(1000, "account2")
-		self.bank.deposit(1000, "account1", 5000)
-		payment_id = self.bank.transfer(2000, "account1", "account2", 1200)
-		result = self.bank.accept_payment(2500, "account1", payment_id)
-		self.assertEqual(result, "3800")
+	def test_level_3_case_06_cancel_after_execution(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.bank.schedule_payment(2, "a", 300, 5)  # executes at 7
+		self.assertEqual(self.bank.deposit(7, "a", 0), "700")
+		self.assertEqual(self.bank.cancel_payment(8, "a", "payment1"), "false")
 
 	@timeout(0.4)
-	def test_level_3_case_07_top_activity(self):
-		"""Test top activity counts all transactions."""
-		self.bank.create_account(1000, "account1")
-		self.bank.create_account(1000, "account2")
-		self.bank.deposit(1000, "account1", 5000)
-		self.bank.deposit(1000, "account2", 3000)
-		# account1: CREATE, DEPOSIT, SCHEDULE_PAYMENT, WITHDRAW, DEPOSIT, WITHDRAW = 6 operations
-		self.bank.schedule_payment(1000, "account1", 500, "DEPOSIT", 2000)
-		self.bank.withdraw(1500, "account1", 200)
-		self.bank.deposit(3500, "account1", 100)
-		self.bank.withdraw(4000, "account1", 1500)
-		# account2: CREATE, DEPOSIT = 2 operations
-		result = self.bank.top_activity(5000, 2)
-		# Counts include CREATE, DEPOSIT, WITHDRAW, SCHEDULE_PAYMENT, etc.
-		self.assertIn("account1", result)
-		self.assertIn("account2", result)
+	def test_level_3_case_07_cancel_wrong_account_or_id(self):
+		self.bank.create_account(1, "a")
+		self.bank.create_account(1, "b")
+		self.bank.schedule_payment(1, "a", 100, 10)
+		self.assertEqual(self.bank.cancel_payment(2, "b", "payment1"), "false")
+		self.assertEqual(self.bank.cancel_payment(2, "a", "payment99"), "false")
 
 	@timeout(0.4)
-	def test_level_3_case_08_payment_counter_increments(self):
-		"""Test that payment IDs increment correctly."""
-		self.bank.create_account(1000, "account1")
-		self.bank.create_account(1000, "account2")
-		self.bank.deposit(1000, "account1", 10000)
-		result1 = self.bank.withdraw(2000, "account1", 1500)
-		self.assertEqual(result1, "payment_1")
-		self.bank.accept_payment(2500, "account1", "payment_1")
-		result2 = self.bank.transfer(3000, "account1", "account2", 1200)
-		self.assertEqual(result2, "payment_2")
+	def test_level_3_case_08_insufficient_at_execution_is_dropped(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 100)
+		self.bank.schedule_payment(2, "a", 500, 5)  # executes at 7, but underfunded
+		self.assertEqual(self.bank.deposit(7, "a", 0), "100")
+		self.assertEqual(self.bank.top_spenders(7, 1), "a(0)")
 
 	@timeout(0.4)
-	def test_level_3_case_09_scheduled_payment_types(self):
-		"""Test both DEPOSIT and WITHDRAW scheduled payments."""
-		self.bank.create_account(1000, "account1")
-		self.bank.deposit(1000, "account1", 5000)
-		# Schedule deposit
-		self.bank.schedule_payment(1000, "account1", 500, "DEPOSIT", 2000)
-		# Schedule withdrawal
-		self.bank.schedule_payment(1000, "account1", 300, "WITHDRAW", 3000)
-		# Check balance after both execute
-		result = self.bank.deposit(5000, "account1", 0)
-		# 5000 + 500 (deposit at 3000) - 300 (withdraw at 4000) = 5200
-		# Wait, this depends on exact execution order
+	def test_level_3_case_09_due_order_by_scheduled_time(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.bank.schedule_payment(1, "a", 200, 10)  # executes at 11 -> payment1
+		self.bank.schedule_payment(1, "a", 300, 5)   # executes at 6  -> payment2
+		self.assertEqual(self.bank.deposit(11, "a", 0), "500")
 
 	@timeout(0.4)
-	def test_level_3_case_10_complete_scenario(self):
-		"""Test complete scenario from test_data_3."""
-		self.assertEqual(self.bank.create_account(1000, "account1"), "true")
-		self.assertEqual(self.bank.create_account(1000, "account2"), "true")
-		self.assertEqual(self.bank.deposit(1000, "account1", 5000), "5000")
-		self.assertEqual(self.bank.deposit(1000, "account2", 3000), "3000")
-		self.assertEqual(self.bank.schedule_payment(1000, "account1", 500, "DEPOSIT", 2000), "true")
-		self.assertEqual(self.bank.withdraw(1500, "account1", 200), "4800")
-		self.assertEqual(self.bank.deposit(3500, "account1", 100), "5400")
-		self.assertEqual(self.bank.withdraw(4000, "account1", 1500), "payment_1")
-		self.assertEqual(self.bank.accept_payment(4500, "account1", "payment_1"), "3900")
-		self.assertEqual(self.bank.transfer(5000, "account2", "account1", 1200), "payment_2")
-		self.assertEqual(self.bank.accept_payment(5500, "account2", "payment_2"), "1800")
-		result = self.bank.top_activity(6000, 2)
-		self.assertEqual(result, "account1(6), account2(2)")
+	def test_level_3_case_10_due_ties_by_schedule_order(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 1000)
+		self.bank.schedule_payment(1, "a", 200, 5)  # executes at 6 -> payment1
+		self.bank.schedule_payment(1, "a", 300, 5)  # executes at 6 -> payment2
+		self.assertEqual(self.bank.deposit(6, "a", 0), "500")
+
+	@timeout(0.4)
+	def test_level_3_case_11_processed_before_triggering_op(self):
+		self.bank.create_account(1, "a")
+		self.bank.deposit(1, "a", 500)
+		self.bank.schedule_payment(1, "a", 400, 5)  # executes at 6
+		# at t=6 the scheduled payment runs first (a -> 100), then pay(200) fails
+		self.assertEqual(self.bank.pay(6, "a", 200), "")
+		self.assertEqual(self.bank.deposit(7, "a", 0), "100")
+		self.assertEqual(self.bank.top_spenders(7, 1), "a(400)")
 
 
 if __name__ == "__main__":

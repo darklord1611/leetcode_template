@@ -1,158 +1,88 @@
 """
 File Storage - Abstract Base Class
 
-This class defines the interface for a simplified file hosting service
-that supports file operations, search, TTL (time-to-live), and rollback functionality.
+A simplified file hosting service. The set of operations is intentionally small:
+later levels extend the BEHAVIOUR of the same functions rather than adding many
+new ones. Implement one level at a time and expect to reopen earlier functions.
 """
-
-from typing import Optional
 
 
 class FileStorage:
-	"""
-	Abstract base class for a file hosting service that stores files
-	with support for basic operations, time-aware operations with TTL,
-	and state rollback.
-	"""
+	"""Abstract base class for the file storage system."""
 
 	def __init__(self):
 		"""Initialize the file storage system."""
 		raise NotImplementedError("Subclasses must implement __init__")
 
-	# Level 1 Methods: Basic Operations
+	# Level 1 Methods: Basic Storage
 
-	def file_upload(self, file_name: str, size: str) -> str:
+	def file_upload(self, timestamp: int, file_name: str, size: int) -> str:
 		"""
-		Upload a file to the storage server.
-
-		Args:
-		    file_name (str): Name of the file to upload
-		    size (str): Size of the file (e.g., "200kb")
+		Upload a file with the given size (an integer).
 
 		Returns:
-		    str: Result message in format "uploaded {file_name}"
-
-		Raises:
-		    RuntimeError: If a file with the same name already exists
+		    str: "true" if uploaded, or "" if a live file with that name
+		         already exists (no overwrite).
 		"""
 		raise NotImplementedError("Subclasses must implement file_upload()")
 
-	def file_get(self, file_name: str) -> str:
+	def file_get(self, timestamp: int, file_name: str) -> str:
 		"""
-		Get information about a file from storage.
-
-		Args:
-		    file_name (str): Name of the file to retrieve
+		Get the size of a file.
 
 		Returns:
-		    str: Result message in format "got {file_name}" if file exists,
-		         empty string if file doesn't exist
+		    str: The file's size as a string, or "" if it does not exist
+		         (or is expired at this timestamp).
 		"""
 		raise NotImplementedError("Subclasses must implement file_get()")
 
-	def file_copy(self, source: str, dest: str) -> str:
+	def file_copy(self, timestamp: int, source: str, dest: str) -> str:
 		"""
-		Copy a file to a new location.
-
-		Args:
-		    source (str): Name of the source file
-		    dest (str): Name of the destination file
+		Copy a file, overwriting dest if it already exists.
 
 		Returns:
-		    str: Result message in format "copied {source} to {dest}"
-
-		Raises:
-		    RuntimeError: If the source file doesn't exist
+		    str: "true" on success, or "" if the source does not exist
+		         (or is expired at this timestamp).
 		"""
 		raise NotImplementedError("Subclasses must implement file_copy()")
 
-	# Level 2 Methods: Search and Query
+	# Level 2 Methods: Search
+	# (Read-only query over the files stored by Level 1.)
 
-	def file_search(self, prefix: str) -> str:
+	def file_search(self, timestamp: int, prefix: str) -> str:
 		"""
-		Search for files by prefix, sorted by size in descending order.
-
-		Args:
-		    prefix (str): Prefix to search for in file names
+		Find files whose name starts with prefix.
 
 		Returns:
-		    str: Result message in format "found [{file1}, {file2}, ...]"
-		         where files are sorted by size (largest first)
+		    str: Up to the top 10 names, ordered by size desc then name asc,
+		         joined by ", ", or "" if none match.
 		"""
 		raise NotImplementedError("Subclasses must implement file_search()")
 
-	# Level 3 Methods: Time-Aware Operations with TTL
+	# Level 3 Methods: TTL
+	# (file_upload, file_get, file_copy, and file_search must be reopened to
+	#  respect time-to-live and ignore expired files.)
 
-	def file_upload_at(self, timestamp: str, file_name: str, size: str, ttl: Optional[int] = None) -> str:
+	def file_upload_with_ttl(self, timestamp: int, file_name: str, size: int, ttl: int) -> str:
 		"""
-		Upload a file at a specific timestamp with optional TTL.
-
-		Args:
-		    timestamp (str): ISO 8601 timestamp (e.g., "2021-07-01T12:00:00")
-		    file_name (str): Name of the file to upload
-		    size (str): Size of the file (e.g., "200kb")
-		    ttl (Optional[int]): Time-to-live in seconds (None = no expiration)
+		Upload a file that is alive for [timestamp, timestamp + ttl).
 
 		Returns:
-		    str: Result message in format "uploaded at {file_name}"
+		    str: "true" if uploaded, or "" if a live file with that name
+		         already exists.
 		"""
-		raise NotImplementedError("Subclasses must implement file_upload_at()")
-
-	def file_get_at(self, timestamp: str, file_name: str) -> str:
-		"""
-		Get information about a file at a specific timestamp.
-
-		Args:
-		    timestamp (str): ISO 8601 timestamp
-		    file_name (str): Name of the file to retrieve
-
-		Returns:
-		    str: Result message in format "got at {file_name}" if file exists
-		         and hasn't expired, "file not found" otherwise
-		"""
-		raise NotImplementedError("Subclasses must implement file_get_at()")
-
-	def file_copy_at(self, timestamp: str, source: str, dest: str) -> str:
-		"""
-		Copy a file at a specific timestamp.
-
-		Args:
-		    timestamp (str): ISO 8601 timestamp
-		    source (str): Name of the source file
-		    dest (str): Name of the destination file
-
-		Returns:
-		    str: Result message in format "copied at {source} to {dest}"
-		"""
-		raise NotImplementedError("Subclasses must implement file_copy_at()")
-
-	def file_search_at(self, timestamp: str, prefix: str) -> str:
-		"""
-		Search for files by prefix at a specific timestamp.
-
-		Args:
-		    timestamp (str): ISO 8601 timestamp
-		    prefix (str): Prefix to search for in file names
-
-		Returns:
-		    str: Result message in format "found at [{file1}, {file2}, ...]"
-		         where files are sorted by size (largest first)
-		"""
-		raise NotImplementedError("Subclasses must implement file_search_at()")
+		raise NotImplementedError("Subclasses must implement file_upload_with_ttl()")
 
 	# Level 4 Methods: Rollback
+	# (The read operations must reflect the rolled-back state.)
 
-	def rollback(self, timestamp: str) -> str:
+	def rollback(self, timestamp: int, rollback_to: int) -> str:
 		"""
-		Rollback the storage state to a specific timestamp.
-
-		This removes all files uploaded after the rollback timestamp
-		and recalculates TTL for files with expiration times.
-
-		Args:
-		    timestamp (str): ISO 8601 timestamp to rollback to
+		Restore the entire store to its exact state as of time rollback_to,
+		recalculating TTLs so each surviving file keeps its remaining lifetime
+		measured from rollback_to.
 
 		Returns:
-		    str: Result message in format "rollback to {timestamp}"
+		    str: "true".
 		"""
 		raise NotImplementedError("Subclasses must implement rollback()")
