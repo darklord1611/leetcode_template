@@ -4,154 +4,104 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Purpose
 
-This is a mock CodeSignal Industry Coding Framework assessment repository designed to help developers prepare for technical pre-screen assessments. It contains practice problems that simulate the structure and complexity of real CodeSignal assessments.
+This is a mock CodeSignal Industry Coding Framework (ICF) assessment repository designed to help developers prepare for technical pre-screen assessments. It contains practice problems that simulate the structure and progressive nature of real CodeSignal assessments.
 
 ## Python Version Requirement
 
-**CRITICAL**: CodeSignal uses Python 3.13.1. All development and testing should use this specific version to match the assessment environment exactly. When installing dependencies or running tests, ensure you're using Python 3.13.1.
+**CRITICAL**: CodeSignal uses Python 3.13.1. Develop and test against this version to match the assessment environment. Use only the standard library plus what is in `requirements.txt` (numpy, sortedcontainers).
 
 ## Installation
 
-Install required dependencies (numpy, sortedcontainers):
 ```bash
 pip install -r requirements.txt
-```
-
-Or with a specific Python version:
-```bash
-/path/to/python3.13.1 -m pip install -r requirements.txt
-```
-
-## Test Running Commands
-
-Tests are organized by level (test_group_1 through test_group_4). Run tests for specific levels using unittest:
-
-```bash
-# Level 1 tests
-python3 -m unittest test_simulation.TestSimulateCodingFramework.test_group_1
-
-# Level 2 tests
-python3 -m unittest test_simulation.TestSimulateCodingFramework.test_group_2
-
-# Level 3 tests
-python3 -m unittest test_simulation.TestSimulateCodingFramework.test_group_3
-
-# Level 4 tests
-python3 -m unittest test_simulation.TestSimulateCodingFramework.test_group_4
-
-# Run all tests
-python3 -m unittest test_simulation.TestSimulateCodingFramework
 ```
 
 ## Repository Structure
 
 ```
 practice_assessments/
-├── banking_system/         # Bank account management with transactions
-├── file_storage/           # File hosting service with TTL
-├── in_memory_database/     # Key-value database with backup/restore
-├── recipe_manager/         # Recipe and meal planning system
-├── task_management_system/ # Task tracking with dependencies
-└── working_hour_register/  # Employee time tracking and payroll
+├── banking_system/         # Accounts, scheduled payments, merges        (4 levels)
+├── cache_system/           # LRU/TTL/dependency cache with namespaces     (7 levels)
+├── dns_resolver/           # A-records, CNAME, round-robin, wildcards     (7 levels)
+├── file_storage/           # File hosting service with TTL and rollback   (4 levels)
+├── in_memory_database/     # Key-value DB with TTL and backup/restore     (4 levels)
+├── recipe_manager/         # Recipes, scaling, meal planning              (4 levels)
+├── task_management_system/ # Tasks, dependencies, critical path           (4 levels)
+└── working_hour_register/  # Clock in/out, breaks, overtime, payroll      (4 levels)
+└── reference/              # integer_container — minimal canonical example
 ```
 
-Each assessment directory contains:
-- `simulation.py` - Implementation file (where you write solutions)
-- `test_simulation.py` - Test cases for all levels
-- `level1.md` through `level4.md` - Requirements for each level
+### Files in each assessment directory
+
+| File | Role |
+|------|------|
+| `<name>.py` | **Abstract base class** — the interface. Every method has a docstring + return contract and raises `NotImplementedError`. Methods are grouped by `# Level N Methods:` comments. |
+| `<name>_impl.py` | **Implementation stub** — a subclass of the ABC where you write your solution. Ships with every method bodied as `# TODO: implement` + `pass`. This is the only file the solver edits. |
+| `description.md` | Single-file spec covering all levels progressively (newer problems). Some older problems instead have cumulative `level1.md … level4.md` files. |
+| `tests/level_N_tests.py` | One `unittest` file per level (`LevelNTests`), comprehensive deterministic cases, each decorated `@timeout(0.4)`. |
+| `main.sh` | Runs all levels: `python3 -m unittest discover -s tests -p '*.py'`. |
+| `run_single_test.sh` | Runs one case: `sh run_single_test.sh test_level_2_case_03`. |
+| `timeout_decorator.py` | SIGALRM-based `@timeout(seconds)`; identical copy in every dir. |
+
+> **Indentation is TABS** in all Python files. Match it exactly.
+
+## Test Running Commands
+
+```bash
+cd practice_assessments/<assessment>
+sh main.sh                                                   # all levels
+python3 -m unittest discover -s tests -p '*.py' -k level_2   # one level
+sh run_single_test.sh test_level_2_case_03                   # one case
+```
 
 ## Assessment Architecture
 
 ### Core Design Pattern
 
-Each practice assessment follows this structure:
+Each assessment is a single class (the `*_impl.py` subclass of the ABC) — there is **no** `simulate_coding_framework` dispatcher. The solver implements real methods that hold instance state.
 
-1. **Main Function**: `simulate_coding_framework(list_of_lists)` - Takes a list of command lists and returns a list of result strings
-2. **Command Format**: Each command is a list with the operation name followed by parameters
-3. **Progressive Levels**: Each level builds on the previous, requiring refactoring to support new functionality
+1. **Methods, not commands.** Each operation is a method on the class with a fixed signature.
+2. **`timestamp` first.** Every stateful method takes `timestamp: int` as its first parameter, even at levels that ignore it, so time-based behaviour can be added in later levels **without changing signatures**.
+3. **String returns.** Operations return strings (`"true"`, `"false"`, `""`, numbers as strings, or formatted lists). Failures generally return `""`.
 
-### Available Practice Assessments
+### The "evolve the core" principle (most important)
 
-#### 1. Banking System
-**Focus**: Account management, transactions, scheduled payments, account merging
-- **Level 1**: CREATE_ACCOUNT, DEPOSIT, WITHDRAW, TRANSFER with validation
-- **Level 2**: TOP_SPENDERS, GET_PAYMENT_HISTORY with aggregation queries
-- **Level 3**: SCHEDULE_PAYMENT with delays, ACCEPT_PAYMENT for 2FA on large transactions
-- **Level 4**: MERGE_ACCOUNTS, GET_BANK_STATISTICS, CASHBACK rewards
+These problems are deliberately built so that a **small set of core functions is reopened and extended across levels**, rather than each level bolting on a batch of independent new functions. A later level adds an edge case or a new requirement that the earlier level was told to ignore, forcing you to **rewrite the body of an existing function** (its name and signature stay the same). New functions are introduced only when genuinely needed; pure-introspection helpers are avoided.
 
-#### 2. File Storage
-**Focus**: File hosting service with TTL and time-based rollback
-- **Level 1**: FILE_UPLOAD, FILE_GET, FILE_COPY with basic error handling
-- **Level 2**: FILE_SEARCH with prefix matching and sorting by size
-- **Level 3**: Time-aware operations with TTL (time-to-live) support
-- **Level 4**: ROLLBACK to previous timestamps with TTL recalculation
+Examples of the evolving core:
+- **banking_system**: `deposit`/`pay`/`transfer` are reopened at L2 (accrue outgoing totals → `top_spenders`), again at L3 (every operation must first execute scheduled payments now due), and again at L4 (resolve merged-away accounts).
+- **dns_resolver**: `resolve` is reopened at every level — L2 CNAME chains, L3 round-robin over multiple IPs, L4 skip expired records, L5 wildcard fallback, L7 weighted round-robin.
+- **cache_system**: `put`/`get` are reopened for LRU eviction (L2), TTL expiry (L3), cascading dependency invalidation (L4), and pinning (L5).
+- **recipe_manager**: the calorie/cost **totals** are reopened for ingredient properties (L2), per-serving scaling (L3), and meal-plan aggregation (L4).
+- **task_management_system**: `update_status` is reopened so transitions are blocked until dependencies are `done` (L3) and for completion analytics (L4).
+- **working_hour_register**: `get_total_hours`/pay calculation is reopened for break subtraction and overtime (L3) and shared across range/payroll queries (L4).
 
-#### 3. In-Memory Database
-**Focus**: Key-value storage with field-level granularity, TTL, backup/restore
-- **Level 1**: SET_FIELD, GET_FIELD, DELETE_FIELD, GET with nested structure
-- **Level 2**: SCAN by prefix, SCAN_BY_FIELD, TOP_N_KEYS by field count
-- **Level 3**: TTL support with SET_FIELD_WITH_TTL and time-aware queries
-- **Level 4**: BACKUP, RESTORE with TTL recalculation, COMPARE backups
+The canonical ICF level progression still holds: **L1** basic CRUD → **L2** queries/filtering/ranking → **L3** refactor for time/edge-cases → **L4** complex operations/analytics. (cache_system and dns_resolver extend this to 7 levels.)
 
-#### 4. Recipe Manager
-**Focus**: Recipe management with ingredients, nutritional info, meal planning
-- **Level 1**: ADD_RECIPE, ADD_INGREDIENT, GET_RECIPE, REMOVE_INGREDIENT
-- **Level 2**: ADD_INGREDIENT_WITH_PROPS (calories, cost), GET_TOTAL_CALORIES, FIND_RECIPES_BY_INGREDIENT
-- **Level 3**: SCALE_RECIPE for servings, ADD_RECIPE_TAG, FIND_RECIPES_IN_BUDGET
-- **Level 4**: CREATE_MEAL_PLAN, GET_MEAL_PLAN_SHOPPING_LIST, SUGGEST_SIMILAR_RECIPES, OPTIMIZE_MEAL_PLAN
+### Source of truth for an assessment's spec
 
-#### 5. Task Management System
-**Focus**: Task tracking with priorities, deadlines, dependencies, history
-- **Level 1**: CREATE_TASK, UPDATE_STATUS, UPDATE_PRIORITY, DELETE_TASK
-- **Level 2**: GET_TASKS_BY_USER, GET_TASKS_BY_STATUS, TOP_PRIORITY_TASKS, REASSIGN_TASK
-- **Level 3**: CREATE_TASK_WITH_DEADLINE, ADD_DEPENDENCY with circular detection, GET_OVERDUE_TASKS, GET_AVAILABLE_TASKS
-- **Level 4**: GET_TASK_HISTORY, GET_USER_STATISTICS, GET_CRITICAL_PATH, PREDICT_COMPLETION
+Read that assessment's `description.md` (or `level*.md`). The ABC (`<name>.py`) documents every method's exact return contract; the tests encode the precise expected values. Don't infer behaviour from this file — it only summarizes.
 
-#### 6. Working Hour Register
-**Focus**: Employee time tracking, overtime calculation, payroll, shift management
-- **Level 1**: CLOCK_IN, CLOCK_OUT, GET_TOTAL_HOURS, IS_CLOCKED_IN
-- **Level 2**: GET_HOURS_ON_DATE, GET_HOURS_IN_RANGE, GET_TOP_EMPLOYEES_BY_HOURS, GET_AVERAGE_DAILY_HOURS
-- **Level 3**: SET_HOURLY_RATE, CALCULATE_OVERTIME_HOURS, GET_PAY_FOR_DATE, ADD_BREAK
-- **Level 4**: CREATE_SHIFT, ASSIGN_SHIFT, GENERATE_PAYROLL_REPORT, GET_SHIFT_STATISTICS, CALCULATE_WEEKLY_OVERTIME
+## Key Implementation Considerations
 
-### Key Implementation Considerations
-
-1. **Incremental Development**: Implement one level at a time, refactoring as needed
-2. **Return Format**: The function returns a list of strings describing operation results
-3. **Time Handling**: Level 3+ uses ISO 8601 timestamps (e.g., "2021-07-01T12:00:00")
-4. **Method Signature**: Never change the `simulate_coding_framework(list_of_lists)` signature
-5. **Available Libraries**: numpy and sortedcontainers are available (see requirements.txt)
+1. **Implement one level at a time**, expecting to reopen earlier functions.
+2. **Never change a method signature** — extend the body instead.
+3. **Backward compatibility**: each level's new behaviour should be a superset of the previous, so earlier-level tests keep passing.
+4. **Determinism**: prefer integer arithmetic and explicit tie-break rules (documented in `description.md`) so tests are reproducible.
 
 ## Expected Time Per Level
 
-These are reference times from real CodeSignal assessments:
+Reference times from real CodeSignal assessments (per 4-level assessment, ~90 minutes total):
 
-- Level 1: 10-15 minutes
-- Level 2: 20-30 minutes
-- Level 3: 30-60 minutes
-- Level 4: 30-60 minutes
+- Level 1: 10–15 min  •  Level 2: 20–30 min  •  Level 3: 30–60 min  •  Level 4: 30–60 min
 
-Total assessment time: 90 minutes (though all levels may take 90-165 minutes to complete fully)
+## Contributing / Refactoring Assessments
 
-## Choosing an Assessment to Practice
+A new or refactored assessment should:
 
-Each assessment tests different aspects of software engineering:
-
-- **Banking System**: Financial transactions, state management, scheduled operations
-- **File Storage**: TTL management, time-based operations, rollback functionality
-- **In-Memory Database**: Nested data structures, backup/restore, data persistence
-- **Recipe Manager**: Aggregations, filtering, optimization algorithms
-- **Task Management System**: Graph algorithms (dependencies), analytics, predictive modeling
-- **Working Hour Register**: Time calculations, date ranges, payroll logic
-
-Start with the assessment that aligns with your target company's domain or the skills you want to practice.
-
-## Contributing New Assessments
-
-New practice assessments should:
-1. Follow the same structure as existing assessments (e.g., `banking_system/`, `file_storage/`)
-2. Be placed in a new subdirectory under `practice_assessments/`
-3. Include level*.md files describing requirements for each level
-4. Include simulation.py (implementation template) and test_simulation.py (comprehensive tests)
-5. Follow the ICF pattern: Level 1 (basic CRUD), Level 2 (queries/filtering), Level 3 (refactoring/advanced features), Level 4 (complex operations/analytics)
-6. Follow guidelines in the PDF: "CodeSignal Skills Evaluation Framework.pdf"
+1. Live in its own subdirectory under `practice_assessments/`, copying `main.sh`, `run_single_test.sh`, and `timeout_decorator.py` from an existing problem (e.g. `banking_system`).
+2. Ship four files of substance: `<name>.py` (ABC), `<name>_impl.py` (TODO stub), `description.md` (single progressive spec), and `tests/level_N_tests.py` for each level.
+3. **Keep the function set small and design for the evolve-the-core principle** above. Mark reopened functions `*(updated)*` in `description.md` and state what changed.
+4. Give every stateful method `timestamp: int` as the first parameter; return strings; use TAB indentation.
+5. **Validate before shipping**: temporarily write a complete reference solution into `<name>_impl.py`, run `python3 -m unittest discover -s tests -p '*.py'` until it prints `OK` with zero failures (this proves the tests' expected values are correct), then restore the empty stub so the solver starts from scratch.
+6. Follow the guidelines in "CodeSignal Skills Evaluation Framework.pdf".
